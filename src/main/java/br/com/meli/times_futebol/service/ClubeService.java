@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ClubeService {
-    public String cadastrar(ClubeRequestDto clubeRequestDto) {
+    public String criarTime(ClubeRequestDto clubeRequestDto) {
 
-        return "clube " + clubeRequestDto.getNome() + " cadastrado com sucesso";
+        return "clube " + clubeRequestDto.nome() + " cadastrado com sucesso";
     }
 }

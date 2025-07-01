@@ -2,14 +2,16 @@ package br.com.meli.times_futebol.controller;
 
 import br.com.meli.times_futebol.dto.ClubeRequestDto;
 import br.com.meli.times_futebol.model.ClubeModel;
-import br.com.meli.times_futebol.repository.ClubeRepository;
 import br.com.meli.times_futebol.service.ClubeService;
+import jakarta.persistence.Id;
 import jakarta.validation.Valid;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("clube")
@@ -18,35 +20,33 @@ public class ClubeController {
     @Autowired // instancia (new) automaticamete a classe ClubeService -
     private ClubeService clubeService;
 
-    @Autowired
-    ClubeRepository clubeRepository;
-
-    @GetMapping("/teste1")
-    public String getMessage() {
-        return "Öla Controller";
-    }
-
-    @GetMapping("/{id}")
-    public String getMessageTest(@PathVariable Long id) {
-        return "Öla Controller.. chave: " + id;
-    }
-
 
     @PostMapping
-    public ResponseEntity<ClubeModel> cadastrar(@RequestBody @Valid ClubeRequestDto clubeRequestDto) {
+    public ResponseEntity<ClubeModel> cadastrarClube(@RequestBody @Valid ClubeRequestDto clubeRequestDto) {
 
-        var ClubeModel = new ClubeModel();
-        BeanUtils.copyProperties(clubeRequestDto, ClubeModel);
+        ClubeModel clubeModel = clubeService.criarTime(clubeRequestDto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(clubeRepository.save(ClubeModel));
+        return ResponseEntity.status(HttpStatus.CREATED).body(clubeModel);
     }
 
-    //@PostMapping
-    //public ResponseEntity<String> cadastrar1(@RequestBody ClubeRequestDto clubeRequestDto) {
+    @GetMapping
+    public ResponseEntity<List<ClubeModel>> listarTodosClubes() {
 
-    //    String mensagem = clubeService.cadastrar(clubeRequestDto);
+        List<ClubeModel> clubeModelsList= clubeService.listarTodosTimes();
 
-    //    return ResponseEntity.status(HttpStatus.CREATED).body(mensagem);
-    //}
+        return ResponseEntity.status(HttpStatus.OK).body(clubeModelsList);
+
+    }
+
+    @GetMapping("/{idValor}")
+    public ResponseEntity<Object> listarClube(@PathVariable Long idValor) {
+
+        Optional<ClubeModel> clubeModelOptional = clubeService.listarTime(idValor);
+        if (clubeModelOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("time nao encontrado");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(clubeModelOptional);
+    }
+
 
 }

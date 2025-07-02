@@ -34,6 +34,10 @@ public class ClubeController {
 
         List<ClubeModel> clubeModelsList= clubeService.listarTodosTimes();
 
+        if(clubeModelsList.isEmpty()){
+            return ResponseEntity.badRequest().build();
+        }
+
         return ResponseEntity.status(HttpStatus.OK).body(clubeModelsList);
 
     }
@@ -63,4 +67,19 @@ public class ClubeController {
 
     }
 
+    @DeleteMapping ("/{idValor}")
+    public ResponseEntity<String> deleteClube(@PathVariable Long idValor,
+                                                 @RequestBody @Valid ClubeRequestDto  clubeRequestDto) {
+
+        Optional<ClubeModel> clubeModelOptional = clubeService.acharTime(idValor);
+
+        if (clubeModelOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("time nao encontrado");
+        }
+
+        String mensagem = clubeService.deleteTime(idValor);
+
+        return ResponseEntity.status(HttpStatus.OK).body(mensagem + ": "+ clubeModelOptional.get().toString());
+
+    }
 }

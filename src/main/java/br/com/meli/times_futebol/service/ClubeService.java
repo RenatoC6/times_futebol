@@ -50,6 +50,13 @@ public class ClubeService {
 
         return clubeModel;
     }
+
+    public String deleteTime(Long id) {
+
+        clubeRepository.deleteById(id);
+
+        return "Clube excluido com sucesso!";
+    }
 }
 
 

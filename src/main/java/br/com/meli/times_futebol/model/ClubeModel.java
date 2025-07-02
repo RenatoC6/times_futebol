@@ -13,6 +13,21 @@ public class ClubeModel implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    private String nome;
+    private String estado;
+    private LocalDate dataCriacao;
+    private Boolean status;
+
+    @Override
+    public String toString() {
+        return "ClubeModel{" +
+                "id=" + id +
+                ", nome='" + nome + '\'' +
+                ", estado='" + estado + '\'' +
+                ", dataCriacao=" + dataCriacao +
+                ", status=" + status +
+                '}';
+    }
 
     public Long getId() {
         return id;
@@ -22,10 +37,6 @@ public class ClubeModel implements Serializable {
         this.id = id;
     }
 
-    private String nome;
-    private String estado;
-    private LocalDate dataCriacao;
-    private Boolean status;
 
     public String getNome() {
         return nome;

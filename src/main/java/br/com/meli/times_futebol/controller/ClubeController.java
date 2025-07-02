@@ -3,8 +3,8 @@ package br.com.meli.times_futebol.controller;
 import br.com.meli.times_futebol.dto.ClubeRequestDto;
 import br.com.meli.times_futebol.model.ClubeModel;
 import br.com.meli.times_futebol.service.ClubeService;
-import jakarta.persistence.Id;
 import jakarta.validation.Valid;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,12 +41,26 @@ public class ClubeController {
     @GetMapping("/{idValor}")
     public ResponseEntity<Object> listarClube(@PathVariable Long idValor) {
 
-        Optional<ClubeModel> clubeModelOptional = clubeService.listarTime(idValor);
+        Optional<ClubeModel> clubeModelOptional = clubeService.acharTime(idValor);
         if (clubeModelOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("time nao encontrado");
         }
         return ResponseEntity.status(HttpStatus.OK).body(clubeModelOptional);
     }
 
+    @PutMapping ("/{idValor}")
+    public ResponseEntity<Object> atualizarClube(@PathVariable Long idValor,
+                                                 @RequestBody @Valid ClubeRequestDto  clubeRequestDto) {
+
+        Optional<ClubeModel> clubeModelOptional = clubeService.acharTime(idValor);
+        if (clubeModelOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("time nao encontrado");
+        }
+
+        ClubeModel clubeModel = clubeService.atualizarTime(clubeModelOptional, clubeRequestDto);
+
+        return ResponseEntity.status(HttpStatus.OK).body(clubeModel);
+
+    }
 
 }

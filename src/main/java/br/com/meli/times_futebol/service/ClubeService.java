@@ -34,13 +34,21 @@ public class ClubeService {
 
     }
 
-    public Optional<ClubeModel> listarTime(Long idValor) {
+    public Optional<ClubeModel> acharTime(Long idValor) {
 
         Optional<ClubeModel> clubeModelOptional = clubeRepository.findById(idValor);
 
         return clubeModelOptional;
 
+    }
 
+    public ClubeModel atualizarTime(Optional clubeModelOptional,  ClubeRequestDto clubeRequestDto) {
+
+        ClubeModel clubeModel = (ClubeModel) clubeModelOptional.get();
+        BeanUtils.copyProperties(clubeRequestDto, clubeModel);
+        clubeRepository.save(clubeModel);
+
+        return clubeModel;
     }
 }
 

@@ -10,3 +10,4 @@ public record ClubeRequestDto(@NotBlank String nome,
                               @NotNull Boolean status) {
 
 }
+

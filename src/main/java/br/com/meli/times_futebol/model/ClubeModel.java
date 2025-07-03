@@ -18,16 +18,7 @@ public class ClubeModel implements Serializable {
     private LocalDate dataCriacao;
     private Boolean status;
 
-    @Override
-    public String toString() {
-        return "ClubeModel{" +
-                "id=" + id +
-                ", nome='" + nome + '\'' +
-                ", estado='" + estado + '\'' +
-                ", dataCriacao=" + dataCriacao +
-                ", status=" + status +
-                '}';
-    }
+
 
     public Long getId() {
         return id;
@@ -71,6 +62,15 @@ public class ClubeModel implements Serializable {
     }
 
 
+    @Override
+    public String toString() {
+        return "Clube: " +
+                "id: " + id +
+                ", nome: " + nome + '\'' +
+                ", estado: " + estado + '\'' +
+                ", dataCriacao: " + dataCriacao +
+                ", status: " + status;
 
+    }
 
 }

@@ -3,13 +3,9 @@ package br.com.meli.times_futebol.service;
 import br.com.meli.times_futebol.dto.ClubeRequestDto;
 import br.com.meli.times_futebol.model.ClubeModel;
 import br.com.meli.times_futebol.repository.ClubeRepository;
-import jakarta.persistence.Id;
-import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,11 +17,11 @@ public class ClubeService {
 
     public ClubeModel criarTime(ClubeRequestDto clubeRequestDto) {
 
-        var ClubeModel = new ClubeModel();
-        BeanUtils.copyProperties(clubeRequestDto, ClubeModel);
-        clubeRepository.save(ClubeModel);
+        var clubeModel = new ClubeModel();
+        BeanUtils.copyProperties(clubeRequestDto, clubeModel);
+        clubeRepository.save(clubeModel);
 
-        return ClubeModel;
+        return clubeModel;
     }
 
     public List<ClubeModel> listarTodosTimes() {

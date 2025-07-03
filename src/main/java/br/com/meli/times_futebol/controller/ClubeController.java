@@ -5,17 +5,12 @@ import br.com.meli.times_futebol.dto.MensagemDTO;
 import br.com.meli.times_futebol.model.ClubeModel;
 import br.com.meli.times_futebol.service.ClubeService;
 import jakarta.validation.Valid;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
-
-import static org.springframework.web.servlet.function.RequestPredicates.contentType;
 
 @RestController
 @RequestMapping("clube")
@@ -73,8 +68,7 @@ public class ClubeController {
     }
 
     @DeleteMapping ("/{idValor}")
-    public ResponseEntity<String> deleteClube(@PathVariable Long idValor,
-                                                 @RequestBody @Valid ClubeRequestDto  clubeRequestDto) {
+    public ResponseEntity<String> deleteClube(@PathVariable Long idValor) {
 
         Optional<ClubeModel> clubeModelOptional = clubeService.acharTime(idValor);
 

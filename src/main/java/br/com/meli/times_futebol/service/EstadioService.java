@@ -7,6 +7,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class EstadioService {
 
@@ -21,4 +24,34 @@ public class EstadioService {
 
         return estadioModel;
     }
+
+    public List<EstadioModel> listarTodosEstadios() {
+
+        return estadioRepository.findAll();
+
+    }
+
+    public Optional<EstadioModel> acharEstadio(Long idValor) {
+
+        Optional<EstadioModel> estadioModelOptional  = estadioRepository.findById(idValor);
+
+        return estadioModelOptional;
+
+    }
+
+    public EstadioModel atualizarEstadio(Optional estadioModelOptional,  EstadioRequestDto estadioRequestDto) {
+
+        EstadioModel estadioModel = (EstadioModel) estadioModelOptional.get();
+        BeanUtils.copyProperties(estadioRequestDto, estadioModel);
+        estadioRepository.save(estadioModel);
+
+        return estadioModel;
+    }
+
+    public void deleteEstadio(Long id) {
+
+        estadioRepository.deleteById(id);
+
+    }
+
 }

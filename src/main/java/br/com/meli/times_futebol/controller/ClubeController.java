@@ -76,9 +76,9 @@ public class ClubeController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("time nao encontrado");
         }
 
-        String mensagem = clubeService.deleteTime(idValor);
+        clubeService.deleteTime(idValor);
 
-        return ResponseEntity.status(HttpStatus.OK).body(mensagem + ": "+ clubeModelOptional.get().toString());
+        return ResponseEntity.status(HttpStatus.OK).body("clube excluido com sucesso: " + ": "+ clubeModelOptional.get().toString());
 
     }
 }

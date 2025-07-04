@@ -47,11 +47,10 @@ public class ClubeService {
         return clubeModel;
     }
 
-    public String deleteTime(Long id) {
+    public void deleteTime(Long id) {
 
         clubeRepository.deleteById(id);
 
-        return "Clube excluido com sucesso!";
     }
 }
 

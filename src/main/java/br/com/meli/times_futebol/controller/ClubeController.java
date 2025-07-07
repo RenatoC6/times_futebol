@@ -1,7 +1,7 @@
 package br.com.meli.times_futebol.controller;
 
+import br.com.meli.times_futebol.Exception.GenericException;
 import br.com.meli.times_futebol.dto.ClubeRequestDto;
-import br.com.meli.times_futebol.dto.MensagemDTO;
 import br.com.meli.times_futebol.model.ClubeModel;
 import br.com.meli.times_futebol.service.ClubeService;
 import jakarta.validation.Valid;
@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("clube")
@@ -35,7 +34,7 @@ public class ClubeController {
 
         if(clubeModelsList.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new MensagemDTO("Nenhum clube encontrado"));
+                    .body(new GenericException("Nenhum clube encontrado"));
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(clubeModelsList);
@@ -43,42 +42,34 @@ public class ClubeController {
     }
 
     @GetMapping("/{idValor}")
-    public ResponseEntity<Object> listarClube(@PathVariable Long idValor) {
+    public ResponseEntity<?> listarClube(@PathVariable Long idValor) {
 
-        Optional<ClubeModel> clubeModelOptional = clubeService.acharTime(idValor);
-        if (clubeModelOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("time nao encontrado");
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(clubeModelOptional);
+        ClubeModel clubeModel = clubeService.acharTime(idValor);
+
+        return ResponseEntity.status(HttpStatus.OK).body(clubeModel);
     }
 
     @PutMapping ("/{idValor}")
-    public ResponseEntity<Object> atualizarClube(@PathVariable Long idValor,
-                                                 @RequestBody @Valid ClubeRequestDto  clubeRequestDto) {
+    public ResponseEntity<?> atualizarClube(@PathVariable Long idValor,
+                                            @RequestBody @Valid ClubeRequestDto  clubeRequestDto) {
 
-        Optional<ClubeModel> clubeModelOptional = clubeService.acharTime(idValor);
-        if (clubeModelOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("time nao encontrado");
-        }
+        ClubeModel clubeModel = clubeService.acharTime(idValor);
 
-        ClubeModel clubeModel = clubeService.atualizarTime(clubeModelOptional, clubeRequestDto);
+        ClubeModel clubeModelAtlz = clubeService.atualizarTime(clubeModel, clubeRequestDto);
 
-        return ResponseEntity.status(HttpStatus.OK).body(clubeModel);
+        return ResponseEntity.status(HttpStatus.OK).body("Clube: " + clubeModelAtlz.getId() + ": "
+                                                                   + clubeModelAtlz.getNome() + " alterado com sucesso");
 
     }
 
     @DeleteMapping ("/{idValor}")
     public ResponseEntity<String> deleteClube(@PathVariable Long idValor) {
 
-        Optional<ClubeModel> clubeModelOptional = clubeService.acharTime(idValor);
-
-        if (clubeModelOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("time nao encontrado");
-        }
+        ClubeModel clubeModel = clubeService.acharTime(idValor);
 
         clubeService.deleteTime(idValor);
 
-        return ResponseEntity.status(HttpStatus.OK).body("clube excluido com sucesso: " + ": "+ clubeModelOptional.get().toString());
+        return ResponseEntity.status(HttpStatus.OK).body("clube excluido com sucesso: " + ": "+ clubeModel.getNome());
 
     }
 }

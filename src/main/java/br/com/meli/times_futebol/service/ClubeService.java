@@ -1,5 +1,6 @@
 package br.com.meli.times_futebol.service;
 
+import br.com.meli.times_futebol.Exception.EntidadeNaoEncontradaException;
 import br.com.meli.times_futebol.dto.ClubeRequestDto;
 import br.com.meli.times_futebol.model.ClubeModel;
 import br.com.meli.times_futebol.repository.ClubeRepository;
@@ -7,7 +8,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ClubeService {
@@ -30,17 +30,18 @@ public class ClubeService {
 
     }
 
-    public Optional<ClubeModel> acharTime(Long idValor) {
+    public ClubeModel acharTime(Long idValor) {
 
-        Optional<ClubeModel> clubeModelOptional = clubeRepository.findById(idValor);
+        ClubeModel clubeModel = clubeRepository.findById(idValor)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Time: "+ idValor +  " nao encontrado"));
 
-        return clubeModelOptional;
+        return clubeModel;
 
     }
 
-    public ClubeModel atualizarTime(Optional clubeModelOptional,  ClubeRequestDto clubeRequestDto) {
+    public ClubeModel atualizarTime(ClubeModel clubeModel,  ClubeRequestDto clubeRequestDto) {
 
-        ClubeModel clubeModel = (ClubeModel) clubeModelOptional.get();
+        clubeModel.setId(clubeModel.getId());
         BeanUtils.copyProperties(clubeRequestDto, clubeModel);
         clubeRepository.save(clubeModel);
 

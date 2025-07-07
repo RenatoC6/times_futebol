@@ -1,14 +1,14 @@
-package br.com.meli.times_futebol.dto;
+package br.com.meli.times_futebol.Exception;
 
-public class MensagemDTO {
+public class ApiError {
+
     private String mensagem;
 
-    public MensagemDTO(String mensagem) {
+    public ApiError(String mensagem) {
         this.mensagem = mensagem;
     }
 
     public String getMensagem() {
         return mensagem;
     }
-
 }

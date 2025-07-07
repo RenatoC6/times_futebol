@@ -1,7 +1,7 @@
 package br.com.meli.times_futebol.controller;
 
+import br.com.meli.times_futebol.Exception.GenericException;
 import br.com.meli.times_futebol.dto.EstadioRequestDto;
-import br.com.meli.times_futebol.dto.MensagemDTO;
 import br.com.meli.times_futebol.model.EstadioModel;
 import br.com.meli.times_futebol.service.EstadioService;
 import jakarta.validation.Valid;
@@ -33,7 +33,7 @@ public class EstadioController {
 
         if(estadioModelList.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new MensagemDTO("Nenhum estadio encontrado"));
+                    .body(new GenericException("Nenhum estadio encontrado"));
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(estadioModelList);

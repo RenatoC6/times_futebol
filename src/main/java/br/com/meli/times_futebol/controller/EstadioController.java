@@ -74,7 +74,7 @@ public class EstadioController {
 
         estadioService.deleteEstadio(idValor);
 
-        return ResponseEntity.status(HttpStatus.OK).body("estadio excluido com sucesso: " + ": "+ estadioModelOptional.get().toString());
+        return ResponseEntity.status(HttpStatus.OK).body("estadio excluido com sucesso: " + ": "+ estadioModelOptional.get().getNomeEstadio());
 
     }
 }

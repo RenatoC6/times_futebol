@@ -2,6 +2,7 @@ package br.com.meli.times_futebol.service;
 
 import br.com.meli.times_futebol.exception.EntidadeNaoEncontradaException;
 import br.com.meli.times_futebol.dto.EstadioRequestDto;
+import br.com.meli.times_futebol.exception.GenericException;
 import br.com.meli.times_futebol.exception.GenericExceptionConflict;
 import br.com.meli.times_futebol.model.EstadioModel;
 import br.com.meli.times_futebol.repository.EstadioRepository;
@@ -19,6 +20,8 @@ public class EstadioService {
 
     public EstadioModel criarEstadio(EstadioRequestDto estadioRequestDto) {
 
+        // nome do clube tem qur ter mais de 2 digitos
+        validaNomeEstadio(estadioRequestDto);
         // valida se ja existe esse nome de clube na base
         validaEstadoExistente(estadioRequestDto);
 
@@ -44,6 +47,11 @@ public class EstadioService {
 
     public EstadioModel atualizarEstadio(EstadioModel estadioModel,  EstadioRequestDto estadioRequestDto) {
 
+        // nome do clube tem qur ter mais de 2 digitos
+        validaNomeEstadio(estadioRequestDto);
+        // valida se ja existe esse nome de clube na base
+        validaEstadoExistente(estadioRequestDto);
+
         estadioModel.setId(estadioModel.getId());
         BeanUtils.copyProperties(estadioRequestDto, estadioModel);
         estadioRepository.save(estadioModel);
@@ -57,6 +65,15 @@ public class EstadioService {
 
     }
 
+    // metodos validacao
+
+    public void validaNomeEstadio(EstadioRequestDto estadioRequestDto) {
+
+        if(estadioRequestDto.nomeEstadio().trim().length() < 3 || estadioRequestDto.nomeEstadio().isEmpty()){
+            throw new GenericException("nome do estadio deve ter no minimo 3 caracteres");
+        }
+
+    }
     public void validaEstadoExistente(EstadioRequestDto estadioRequestDto) {
         if(estadioRepository.existsByNomeEstadioIgnoreCase(estadioRequestDto.nomeEstadio())){
             throw new GenericExceptionConflict("Estadio : " + estadioRequestDto.nomeEstadio() + " ja cadastrado");

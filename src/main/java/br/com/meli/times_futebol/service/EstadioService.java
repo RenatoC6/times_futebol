@@ -1,6 +1,6 @@
 package br.com.meli.times_futebol.service;
 
-import br.com.meli.times_futebol.Exception.EntidadeNaoEncontradaException;
+import br.com.meli.times_futebol.exception.EntidadeNaoEncontradaException;
 import br.com.meli.times_futebol.dto.EstadioRequestDto;
 import br.com.meli.times_futebol.model.EstadioModel;
 import br.com.meli.times_futebol.repository.EstadioRepository;

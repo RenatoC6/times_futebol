@@ -1,6 +1,6 @@
 package br.com.meli.times_futebol.controller;
 
-import br.com.meli.times_futebol.Exception.GenericException;
+import br.com.meli.times_futebol.exception.GenericException;
 import br.com.meli.times_futebol.dto.ClubeRequestDto;
 import br.com.meli.times_futebol.model.ClubeModel;
 import br.com.meli.times_futebol.service.ClubeService;

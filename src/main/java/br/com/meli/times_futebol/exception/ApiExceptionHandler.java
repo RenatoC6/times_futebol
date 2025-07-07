@@ -1,4 +1,4 @@
-package br.com.meli.times_futebol.Exception;
+package br.com.meli.times_futebol.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,4 +19,11 @@ public class ApiExceptionHandler {
         ApiError error = new ApiError(ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
+
+    @ExceptionHandler(GenericExceptionConflict.class)
+    public ResponseEntity<ApiError> handleGenericExceptionConflict(GenericExceptionConflict ex) {
+        ApiError error = new ApiError(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
 }

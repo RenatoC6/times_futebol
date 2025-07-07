@@ -1,4 +1,4 @@
-package br.com.meli.times_futebol.Exception;
+package br.com.meli.times_futebol.exception;
 
 public class ApiError {
 

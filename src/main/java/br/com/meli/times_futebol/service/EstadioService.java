@@ -1,5 +1,6 @@
 package br.com.meli.times_futebol.service;
 
+import br.com.meli.times_futebol.Exception.EntidadeNaoEncontradaException;
 import br.com.meli.times_futebol.dto.EstadioRequestDto;
 import br.com.meli.times_futebol.model.EstadioModel;
 import br.com.meli.times_futebol.repository.EstadioRepository;
@@ -8,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class EstadioService {
@@ -31,17 +31,16 @@ public class EstadioService {
 
     }
 
-    public Optional<EstadioModel> acharEstadio(Long idValor) {
+    public EstadioModel acharEstadio(Long idValor) {
 
-        Optional<EstadioModel> estadioModelOptional  = estadioRepository.findById(idValor);
-
-        return estadioModelOptional;
+        return estadioRepository.findById(idValor)
+                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Estadio: "+ idValor +  " nao encontrado"));
 
     }
 
-    public EstadioModel atualizarEstadio(Optional estadioModelOptional,  EstadioRequestDto estadioRequestDto) {
+    public EstadioModel atualizarEstadio(EstadioModel estadioModel,  EstadioRequestDto estadioRequestDto) {
 
-        EstadioModel estadioModel = (EstadioModel) estadioModelOptional.get();
+        estadioModel.setId(estadioModel.getId());
         BeanUtils.copyProperties(estadioRequestDto, estadioModel);
         estadioRepository.save(estadioModel);
 

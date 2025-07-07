@@ -32,10 +32,8 @@ public class ClubeService {
 
     public ClubeModel acharTime(Long idValor) {
 
-        ClubeModel clubeModel = clubeRepository.findById(idValor)
-                .orElseThrow(() -> new EntidadeNaoEncontradaException("Time: "+ idValor +  " nao encontrado"));
-
-        return clubeModel;
+        return clubeRepository.findById(idValor)
+               .orElseThrow(() -> new EntidadeNaoEncontradaException("Time: "+ idValor +  " nao encontrado"));
 
     }
 

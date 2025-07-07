@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("estadio")
@@ -22,6 +21,7 @@ public class EstadioController {
 
     @PostMapping
     public ResponseEntity<EstadioModel> cadastrarEstadio(@RequestBody @Valid EstadioRequestDto estadioRequestDto) {
+
         EstadioModel estadioModel = estadioService.criarEstadio(estadioRequestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(estadioModel);
@@ -29,6 +29,7 @@ public class EstadioController {
 
     @GetMapping
     public ResponseEntity<?> listartodosEstadios() {
+
         List<EstadioModel> estadioModelList= estadioService.listarTodosEstadios();
 
         if(estadioModelList.isEmpty()){
@@ -40,41 +41,33 @@ public class EstadioController {
     }
 
     @GetMapping("/{idValor}")
-    public ResponseEntity<Object> ListarEstadios(@PathVariable Long idValor) {
+    public ResponseEntity<?> ListarEstadios(@PathVariable Long idValor) {
 
-        Optional<EstadioModel> estadioModelOptional = estadioService.acharEstadio(idValor);
-        if (estadioModelOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("estadio nao encontrado");
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(estadioModelOptional);
+        EstadioModel estadioModel = estadioService.acharEstadio(idValor);
+
+        return ResponseEntity.status(HttpStatus.OK).body(estadioModel);
     }
 
     @PutMapping ("/{idValor}")
-    public ResponseEntity<Object> atualizarEstadio(@PathVariable Long idValor,
+    public ResponseEntity<?> atualizarEstadio(@PathVariable Long idValor,
                                                    @RequestBody @Valid EstadioRequestDto estadioRequestDto) {
-        Optional<EstadioModel> estadioModelOptional = estadioService.acharEstadio(idValor);
-        if (estadioModelOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("estadio nao encontrado");
-        }
 
-        EstadioModel estadioModel = estadioService.atualizarEstadio (estadioModelOptional, estadioRequestDto);
+        EstadioModel estadioModel = estadioService.acharEstadio(idValor);
 
-        return ResponseEntity.status(HttpStatus.OK).body(estadioModel);
+        EstadioModel estadioModelAtlz = estadioService.atualizarEstadio(estadioModel, estadioRequestDto);
+
+        return ResponseEntity.status(HttpStatus.OK).body(estadioModelAtlz);
 
     }
 
     @DeleteMapping ("/{idValor}")
-    public ResponseEntity<String> deleteEstadio(@PathVariable Long idValor) {
+    public ResponseEntity<?> deleteEstadio(@PathVariable Long idValor) {
 
-        Optional<EstadioModel> estadioModelOptional = estadioService.acharEstadio(idValor);
-
-        if (estadioModelOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("estadio nao encontrado");
-        }
+        EstadioModel estadioModel = estadioService.acharEstadio(idValor);
 
         estadioService.deleteEstadio(idValor);
 
-        return ResponseEntity.status(HttpStatus.OK).body("estadio excluido com sucesso: " + ": "+ estadioModelOptional.get().getNomeEstadio());
+        return ResponseEntity.status(HttpStatus.OK).body("estadio excluido com sucesso: " + ": "+ estadioModel.getNomeEstadio());
 
     }
 }

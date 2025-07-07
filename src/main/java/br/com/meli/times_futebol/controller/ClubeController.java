@@ -68,9 +68,9 @@ public class ClubeController {
 
         ClubeModel clubeModel = clubeService.acharTime(idValor);
 
-        clubeService.deleteTime(idValor);
+        clubeService.inativaTime(clubeModel);
 
-        return ResponseEntity.status(HttpStatus.OK).body("clube excluido com sucesso: " + ": "+ clubeModel.getNome());
+        return ResponseEntity.status(HttpStatus.OK).body("clube inativado com sucesso: " + clubeModel.getNome());
 
     }
 }

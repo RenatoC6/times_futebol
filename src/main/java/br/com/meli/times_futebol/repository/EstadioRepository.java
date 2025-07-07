@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EstadioRepository extends JpaRepository<EstadioModel, Long> {
+
+    boolean existsByNomeEstadioIgnoreCase(String nomeEstadio);
 }

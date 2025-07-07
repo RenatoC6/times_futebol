@@ -2,6 +2,7 @@ package br.com.meli.times_futebol.service;
 
 import br.com.meli.times_futebol.exception.EntidadeNaoEncontradaException;
 import br.com.meli.times_futebol.dto.EstadioRequestDto;
+import br.com.meli.times_futebol.exception.GenericExceptionConflict;
 import br.com.meli.times_futebol.model.EstadioModel;
 import br.com.meli.times_futebol.repository.EstadioRepository;
 import org.springframework.beans.BeanUtils;
@@ -17,6 +18,9 @@ public class EstadioService {
     EstadioRepository estadioRepository;
 
     public EstadioModel criarEstadio(EstadioRequestDto estadioRequestDto) {
+
+        // valida se ja existe esse nome de clube na base
+        validaEstadoExistente(estadioRequestDto);
 
         var estadioModel = new EstadioModel();
         BeanUtils.copyProperties(estadioRequestDto, estadioModel);
@@ -51,6 +55,12 @@ public class EstadioService {
 
         estadioRepository.deleteById(id);
 
+    }
+
+    public void validaEstadoExistente(EstadioRequestDto estadioRequestDto) {
+        if(estadioRepository.existsByNomeEstadioIgnoreCase(estadioRequestDto.nomeEstadio())){
+            throw new GenericExceptionConflict("Estadio : " + estadioRequestDto.nomeEstadio() + " ja cadastrado");
+        }
     }
 
 }

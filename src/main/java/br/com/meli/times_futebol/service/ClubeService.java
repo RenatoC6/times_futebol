@@ -69,9 +69,10 @@ public class ClubeService {
         return clubeModel;
     }
 
-    public void deleteTime(Long id) {
+    public void inativaTime(ClubeModel clubeModel) {
 
-        clubeRepository.deleteById(id);
+        clubeModel.setStatus(false);
+        clubeRepository.save(clubeModel);
 
     }
 

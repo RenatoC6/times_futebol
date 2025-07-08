@@ -37,12 +37,6 @@ public class EstadioService {
         return estadioModel;
     }
 
-//    public List<EstadioModel> listarTodosEstadios() {
-//
-//        return estadioRepository.findAll();
-//
-//    }
-
 
         public Page<EstadioModel> listarTodosEstadios(Pageable pageable) {
 

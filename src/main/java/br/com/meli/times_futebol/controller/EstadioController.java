@@ -46,7 +46,8 @@ public class EstadioController {
         //Direção: a direção definida acima (ASC ou DESC)
         Sort sortOrder = Sort.by(direction, sort[0]);
 
-        // Cria um objeto do tipo PageRequest, que implementa Pageable.  Página: page (começa em 0), Tamanho da página: size (quantos registros mostrar por página)
+        // Cria um objeto do tipo PageRequest, que implementa Pageable.
+        // Página: page (começa em 0), Tamanho da página: size (quantos registros mostrar por página)
         // Ordenação: sortOrder (definido acima)
         Pageable pageable = PageRequest.of(page, size, sortOrder);
 

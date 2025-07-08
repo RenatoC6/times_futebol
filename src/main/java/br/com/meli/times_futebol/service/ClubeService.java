@@ -40,11 +40,6 @@ public class ClubeService {
         return clubeModel;
     }
 
-//    public List<ClubeModel> listarTodosTimes() {
-//
-//        return clubeRepository.findAll();
-//
-//    }
 
     public Page<ClubeModel> listarTodosTimes(Pageable pageable) {
 

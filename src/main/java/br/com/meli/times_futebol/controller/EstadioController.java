@@ -31,7 +31,6 @@ public class EstadioController {
 
     @GetMapping
     public ResponseEntity<?> listartodosEstadios(
-            @RequestParam(required = false) String nomeE,
             @RequestParam(defaultValue = "0") int page, //número da página a ser exibida (padrão: 0 = primeira página)
             @RequestParam(defaultValue = "10") int size, //quantidade de itens por página (padrão: 10)
             @RequestParam(defaultValue = "nomeEstadio,asc") String[] sort) //critério de ordenação — array com 2 posições, padrão "id,asc" (id é o campo, asc é a direção).

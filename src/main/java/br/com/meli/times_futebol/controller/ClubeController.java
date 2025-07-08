@@ -6,6 +6,10 @@ import br.com.meli.times_futebol.model.ClubeModel;
 import br.com.meli.times_futebol.service.ClubeService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,16 +33,26 @@ public class ClubeController {
     }
 
     @GetMapping
-    public ResponseEntity<?> listarTodosClubes() {
+    public ResponseEntity<?> listarTodosClubes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "nome,asc") String[] sort) {
 
-        List<ClubeModel> clubeModelsList = clubeService.listarTodosTimes();
+        // Criando objeto Sort
+        Sort.Direction direction = sort[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
 
-        if(clubeModelsList.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        Sort sortOrder = Sort.by(direction, sort[0]);
+
+        Pageable pageable = PageRequest.of(page, size, sortOrder);
+
+        Page<ClubeModel> clubesPage = clubeService.listarTodosTimes(pageable);
+
+        if(clubesPage.isEmpty()){
+            return ResponseEntity.status(HttpStatus.OK)
                     .body(new GenericException("Nenhum clube encontrado"));
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(clubeModelsList);
+        return ResponseEntity.status(HttpStatus.OK).body(clubesPage);
 
     }
 

@@ -8,6 +8,11 @@ import br.com.meli.times_futebol.model.EstadioModel;
 import br.com.meli.times_futebol.repository.EstadioRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,11 +37,18 @@ public class EstadioService {
         return estadioModel;
     }
 
-    public List<EstadioModel> listarTodosEstadios() {
+//    public List<EstadioModel> listarTodosEstadios() {
+//
+//        return estadioRepository.findAll();
+//
+//    }
 
-        return estadioRepository.findAll();
 
-    }
+        public Page<EstadioModel> listarTodosEstadios(Pageable pageable) {
+
+            return estadioRepository.findAll(pageable);
+
+        }
 
     public EstadioModel acharEstadio(Long idValor) {
 
@@ -49,13 +61,15 @@ public class EstadioService {
 
         // nome do clube tem qur ter mais de 2 digitos
         validaNomeEstadio(estadioRequestDto);
-        // valida se ja existe esse nome de clube na base
-        validaEstadoExistente(estadioRequestDto);
 
-        estadioModel.setId(estadioModel.getId());
-        BeanUtils.copyProperties(estadioRequestDto, estadioModel);
-        estadioRepository.save(estadioModel);
+        if (!estadioModel.getNomeEstadio().equals(estadioRequestDto.nomeEstadio())) {
+            // valida se ja existe esse nome de clube na base
+            validaEstadoExistente(estadioRequestDto);
 
+            estadioModel.setId(estadioModel.getId());
+            BeanUtils.copyProperties(estadioRequestDto, estadioModel);
+            estadioRepository.save(estadioModel);
+    }
         return estadioModel;
     }
 

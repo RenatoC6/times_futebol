@@ -9,6 +9,8 @@ import br.com.meli.times_futebol.model.ClubeModel;
 import br.com.meli.times_futebol.repository.ClubeRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -38,9 +40,15 @@ public class ClubeService {
         return clubeModel;
     }
 
-    public List<ClubeModel> listarTodosTimes() {
+//    public List<ClubeModel> listarTodosTimes() {
+//
+//        return clubeRepository.findAll();
+//
+//    }
 
-        return clubeRepository.findAll();
+    public Page<ClubeModel> listarTodosTimes(Pageable pageable) {
+
+        return clubeRepository.findAll(pageable);
 
     }
 
@@ -59,8 +67,11 @@ public class ClubeService {
         validaEstado(clubeRequestDto);
         // valida da nula ou no futuro
         validaDataCriacao(clubeRequestDto);
-        // valida se ja existe esse nome de clube na base
-        validaNomeExistente(clubeRequestDto);
+
+        // valida se ja existe esse nome de clube na base, exceto se o nome nao foi alterado
+        if(!clubeModel.getNome().equals(clubeRequestDto.nome())) {
+            validaNomeExistente(clubeRequestDto);
+        }
 
         clubeModel.setId(clubeModel.getId());
         BeanUtils.copyProperties(clubeRequestDto, clubeModel);

@@ -2,10 +2,11 @@ package br.com.meli.times_futebol.repository;
 
 import br.com.meli.times_futebol.model.ClubeModel;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ClubeRepository extends JpaRepository<ClubeModel, Long> {
+public interface ClubeRepository extends JpaRepository<ClubeModel, Long>{
 
     // aqui vale um comentario basico de um iniciante:
     // se o metodo abaixo esta dentro de uma interface, por que náo necessita implementacao

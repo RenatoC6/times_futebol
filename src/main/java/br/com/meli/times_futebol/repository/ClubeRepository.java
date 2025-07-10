@@ -2,7 +2,6 @@ package br.com.meli.times_futebol.repository;
 
 import br.com.meli.times_futebol.model.ClubeModel;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository

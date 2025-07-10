@@ -2,7 +2,6 @@ package br.com.meli.times_futebol.controller;
 
 import br.com.meli.times_futebol.dto.PartidaRequestDto;
 import br.com.meli.times_futebol.model.PartidaModel;
-import br.com.meli.times_futebol.repository.PartidaRepository;
 import br.com.meli.times_futebol.service.PartidaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

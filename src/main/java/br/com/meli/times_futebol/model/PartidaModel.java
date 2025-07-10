@@ -11,11 +11,11 @@ public class PartidaModel implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name= "gols_mandante")
+    //@Column(name= "gols_mandante")
     private Long golsMandante;
-    @Column(name = "gols_visitante")
+    //@Column(name = "gols_visitante")
     private Long golsVisitante;
-    @Column(name = "data_partida")
+    //@Column(name = "data_partida")
     private LocalDate dataPartida;
 
     @ManyToOne

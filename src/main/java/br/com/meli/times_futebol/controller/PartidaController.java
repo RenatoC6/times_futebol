@@ -49,4 +49,5 @@ public class PartidaController {
 
         return ResponseEntity.status(HttpStatus.OK).body(partidaService.listarTodasPartidas(page, size, sort));
     }
+
 }

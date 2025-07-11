@@ -23,13 +23,10 @@ public class ClubeService {
 
     public ClubeModel criarTime(ClubeRequestDto clubeRequestDto) {
 
-        // nome do clube tem qur ter mais de 2 digitos
+
         validaNome(clubeRequestDto);
-        // Se o estado for inválido, invoca o metodo exists do enum
         validaEstado(clubeRequestDto);
-        // valida da nula ou no futuro
         validaDataCriacao(clubeRequestDto);
-        // valida se ja existe esse nome de clube na base
         validaNomeExistente(clubeRequestDto);
 
         var clubeModel = new ClubeModel();
@@ -55,11 +52,9 @@ public class ClubeService {
 
     public ClubeModel atualizarTime(ClubeModel clubeModel,  ClubeRequestDto clubeRequestDto) {
 
-        // nome do clube tem qur ter mais de 2 digitos
+
         validaNome(clubeRequestDto);
-        // Se o estado for inválido, invoca o metodo exists do enum
         validaEstado(clubeRequestDto);
-        // valida da nula ou no futuro
         validaDataCriacao(clubeRequestDto);
 
         // valida se ja existe esse nome de clube na base, exceto se o nome nao foi alterado

@@ -12,8 +12,13 @@ import br.com.meli.times_futebol.repository.EstadioRepository;
 import br.com.meli.times_futebol.repository.PartidaRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.security.PublicKey;
 import java.time.LocalDate;
 
 @Service
@@ -49,6 +54,50 @@ public class PartidaService {
         partidaRepository.save(partidaModel);
 
         return partidaModel;
+    }
+
+    public PartidaModel atualizarPartida(PartidaModel partidaExistente, PartidaRequestDto partidaRequestDto,Long idPartida) {
+
+        ClubeModel mandante = buscarClube(partidaRequestDto.clubeMandante(), "mandante");
+        ClubeModel visitante = buscarClube(partidaRequestDto.clubeVisitante(), "visitante");
+        EstadioModel estadioPartida = buscarEstadio(partidaRequestDto.estadioPartida());
+
+        validaClubeAtivo(mandante, visitante);
+        validaGols(partidaRequestDto);
+        validaClubesIguais(partidaRequestDto);
+        validaDataPatidaFutura(partidaRequestDto);
+        validarDataPosteriorCriacaoClubes(partidaRequestDto, mandante, visitante);
+       if(!partidaExistente.getId().equals(idPartida)) {
+            validaEstadioOcupadonaDataPartida(estadioPartida, partidaRequestDto);
+            validarPartidaDuplicada(mandante, visitante, estadioPartida);
+       }
+
+
+        BeanUtils.copyProperties(partidaRequestDto, partidaExistente, "id");
+        partidaExistente.setClubeMandante(mandante);
+        partidaExistente.setClubeVisitante(visitante);
+        partidaExistente.setEstadioPartida(estadioPartida);
+
+        return partidaRepository.save(partidaExistente);
+    }
+
+
+    public PartidaModel acharPartida(Long idValor) {
+
+        return partidaRepository.findById(idValor)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Partida: "+ idValor +  " nao encontrada"));
+
+    }
+
+    public Page<PartidaModel> listarTodasPartidas(int page, int size, String[] sort) {
+
+        // Criando objeto Sort
+        Sort.Direction direction = sort[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sortOrder = Sort.by(direction, sort[0]);
+
+        Pageable pageable = PageRequest.of(page, size, sortOrder);
+
+        return partidaRepository.findAll(pageable);
     }
 
 // metdodos de validação
@@ -96,7 +145,7 @@ public class PartidaService {
 
     private void validarPartidaDuplicada(ClubeModel mandante, ClubeModel visitante, EstadioModel estadio) {
         if (partidaRepository.existsByClubeMandanteAndClubeVisitanteAndEstadioPartida(mandante, visitante, estadio)) {
-            throw new GenericException("Já existe uma partida com mandante " +
+            throw new GenericExceptionConflict("Já existe uma partida com mandante " +
                     mandante.getNome() + ", visitante " + visitante.getNome() +
                     " e estádio " + estadio.getNomeEstadio());
         }

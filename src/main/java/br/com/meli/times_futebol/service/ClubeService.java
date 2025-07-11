@@ -111,6 +111,8 @@ public class ClubeService {
             throw new GenericExceptionConflict("Nome : " + clubeRequestDto.nome() + " ja cadastrado");
         }
     }
+
+
 }
 
 

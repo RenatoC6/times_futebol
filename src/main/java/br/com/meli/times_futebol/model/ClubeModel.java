@@ -19,7 +19,6 @@ public class ClubeModel implements Serializable {
     private Boolean status;
 
 
-
     public Long getId() {
         return id;
     }
@@ -73,6 +72,8 @@ public class ClubeModel implements Serializable {
 
     }
 
-
+    public boolean isAtivo() {
+        return status;
+    }
 
 }

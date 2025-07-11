@@ -20,7 +20,9 @@ public class PartidaController {
 
      @PostMapping
      public ResponseEntity<PartidaModel> criarPartida(@RequestBody PartidaRequestDto partidaRequestDto) {
+
          PartidaModel novaPartida = partidaService.criarPartida(partidaRequestDto);
+
          return ResponseEntity.status(HttpStatus.CREATED).body(novaPartida);
 
 

@@ -23,7 +23,6 @@ public class ClubeService {
 
     public ClubeModel criarTime(ClubeRequestDto clubeRequestDto) {
 
-
         validaNome(clubeRequestDto);
         validaEstado(clubeRequestDto);
         validaDataCriacao(clubeRequestDto);
@@ -50,8 +49,9 @@ public class ClubeService {
 
     }
 
-    public ClubeModel atualizarTime(ClubeModel clubeModel,  ClubeRequestDto clubeRequestDto) {
+    public ClubeModel atualizarTime(Long idValor,  ClubeRequestDto clubeRequestDto) {
 
+        ClubeModel clubeModel =  acharTime(idValor);
 
         validaNome(clubeRequestDto);
         validaEstado(clubeRequestDto);
@@ -64,16 +64,20 @@ public class ClubeService {
 
         clubeModel.setId(clubeModel.getId());
         BeanUtils.copyProperties(clubeRequestDto, clubeModel);
+
         clubeRepository.save(clubeModel);
 
         return clubeModel;
     }
 
-    public void inativaTime(ClubeModel clubeModel) {
+    public ClubeModel inativaTime(Long idValor) {
 
-        clubeModel.setStatus(false);
+        ClubeModel clubeModel = acharTime(idValor);
+        clubeModel.setStatus(true);
+
         clubeRepository.save(clubeModel);
 
+        return clubeModel;
     }
 
     // metodos validacao

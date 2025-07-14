@@ -67,9 +67,7 @@ public class ClubeController {
     public ResponseEntity<?> atualizarClube(@PathVariable Long idValor,
                                             @RequestBody @Valid ClubeRequestDto  clubeRequestDto) {
 
-        ClubeModel clubeModel = clubeService.acharTime(idValor);
-
-        ClubeModel clubeModelAtlz = clubeService.atualizarTime(clubeModel, clubeRequestDto);
+        ClubeModel clubeModelAtlz = clubeService.atualizarTime(idValor, clubeRequestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body("Clube: " + clubeModelAtlz.getId() + ": "
                                                                    + clubeModelAtlz.getNome() + " alterado com sucesso");
@@ -79,9 +77,7 @@ public class ClubeController {
     @DeleteMapping ("/{idValor}")
     public ResponseEntity<String> deleteClube(@PathVariable Long idValor) {
 
-        ClubeModel clubeModel = clubeService.acharTime(idValor);
-
-        clubeService.inativaTime(clubeModel);
+        ClubeModel clubeModel = clubeService.inativaTime(idValor);
 
         return ResponseEntity.status(HttpStatus.OK).body("clube inativado com sucesso: " + clubeModel.getNome());
 

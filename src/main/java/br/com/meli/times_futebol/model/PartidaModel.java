@@ -2,7 +2,7 @@ package br.com.meli.times_futebol.model;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "partida")
@@ -16,7 +16,7 @@ public class PartidaModel implements Serializable {
     //@Column(name = "gols_visitante")
     private Long golsVisitante;
     //@Column(name = "data_partida")
-    private LocalDate dataPartida;
+    private LocalDateTime dataPartida;
 
     @ManyToOne
     private ClubeModel clubeMandante;
@@ -54,11 +54,11 @@ public class PartidaModel implements Serializable {
         this.golsVisitante = golsVisitante;
     }
 
-    public LocalDate getDataPartida() {
+    public LocalDateTime getDataPartida() {
         return dataPartida;
     }
 
-    public void setDataPartida(LocalDate dataPartida) {
+    public void setDataPartida(LocalDateTime dataPartida) {
         this.dataPartida = dataPartida;
     }
 

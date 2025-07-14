@@ -18,8 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.security.PublicKey;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 public class PartidaService {
@@ -43,7 +42,7 @@ public class PartidaService {
         validaDataPatidaFutura(partidaRequestDto);
         validaEstadioOcupadonaDataPartida(estadioPartida, partidaRequestDto);
         validarPartidaDuplicada(mandante, visitante, estadioPartida);
-        validarDataPosteriorCriacaoClubes(partidaRequestDto, mandante, visitante);
+        validarDataPosteriorCriacaoClubesEConflitoHoras(partidaRequestDto, mandante, visitante);
 
         var partidaModel = new PartidaModel();
         BeanUtils.copyProperties(partidaRequestDto, partidaModel);
@@ -66,7 +65,7 @@ public class PartidaService {
         validaGols(partidaRequestDto);
         validaClubesIguais(partidaRequestDto);
         validaDataPatidaFutura(partidaRequestDto);
-        validarDataPosteriorCriacaoClubes(partidaRequestDto, mandante, visitante);
+        validarDataPosteriorCriacaoClubesEConflitoHoras(partidaRequestDto, mandante, visitante);
        if(!partidaExistente.getId().equals(idPartida)) {
             validaEstadioOcupadonaDataPartida(estadioPartida, partidaRequestDto);
             validarPartidaDuplicada(mandante, visitante, estadioPartida);
@@ -132,7 +131,7 @@ public class PartidaService {
     }
 
     private void validaDataPatidaFutura(PartidaRequestDto partidaRequestDto) {
-        if (partidaRequestDto.dataPartida() == null || partidaRequestDto.dataPartida().isAfter(java.time.LocalDate.now())) {
+        if (partidaRequestDto.dataPartida() == null || partidaRequestDto.dataPartida().isAfter(LocalDateTime.now())) {
             throw new GenericException("Data da partida inválida ou no futuro");
         }
     }
@@ -151,14 +150,38 @@ public class PartidaService {
         }
     }
 
-    private void validarDataPosteriorCriacaoClubes(PartidaRequestDto partidaRequestDto, ClubeModel mandante, ClubeModel visitante) {
-        LocalDate dataPartida = partidaRequestDto.dataPartida();
-        if (dataPartida.isBefore(mandante.getDataCriacao())) {
+    private void validarDataPosteriorCriacaoClubesEConflitoHoras(PartidaRequestDto partidaRequestDto, ClubeModel mandante, ClubeModel visitante) {
+        LocalDateTime dataPartida = partidaRequestDto.dataPartida();
+
+        if (dataPartida.toLocalDate().isBefore(mandante.getDataCriacao())) {
             throw new GenericExceptionConflict("Data da partida anterior à criação do clube mandante: " + mandante.getNome());
         }
-        if (dataPartida.isBefore(visitante.getDataCriacao())) {
+        if (dataPartida.toLocalDate().isBefore(visitante.getDataCriacao())) {
             throw new GenericExceptionConflict("Data da partida anterior à criação do clube visitante: " + visitante.getNome());
         }
+
+        // Validação de partidas com diferença menor que 48 horas para os clubes
+        long intervalo = 48; // horas
+        LocalDateTime iniciointervalo = dataPartida.minusHours(intervalo);
+        LocalDateTime fimIntervalo = dataPartida.plusHours(intervalo);
+
+        boolean existeMandante_ComConflito = partidaRepository.existsByClubeMandante_AndDataPartidaBetween(
+                mandante, iniciointervalo, fimIntervalo
+        );
+        if (existeMandante_ComConflito) {
+            throw new GenericExceptionConflict("O clube " + mandante.getNome() +
+                    " já possui uma partida marcada em menos de 48h em relação à data informada.");
+        }
+
+        boolean existeVisitanteComConflito = partidaRepository.existsByClubeVisitante_AndDataPartidaBetween(
+                visitante, iniciointervalo, fimIntervalo
+        );
+        if (existeVisitanteComConflito) {
+            throw new GenericExceptionConflict("O clube " + visitante.getNome() +
+                    " já possui uma partida marcada em menos de 48h em relação à data informada.");
+        }
+
+
     }
 
 }

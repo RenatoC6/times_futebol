@@ -62,7 +62,7 @@ public class ClubeService {
             validaNomeExistente(clubeRequestDto);
         }
 
-        clubeModel.setId(clubeModel.getId());
+        clubeModel.setId(idValor);
         BeanUtils.copyProperties(clubeRequestDto, clubeModel);
 
         clubeRepository.save(clubeModel);
@@ -84,7 +84,7 @@ public class ClubeService {
 
     public void validaNome(ClubeRequestDto clubeRequestDto) {
 
-        if(clubeRequestDto.nome().trim().length() < 3 || clubeRequestDto.nome().isEmpty()){
+        if(clubeRequestDto.nome().trim().length() < 3){
             throw new GenericException("nome deve ter no minimo 3 caracteres");
         }
 

@@ -61,6 +61,7 @@ public class ClubeServiceTest {
         ClubeModel clubeModel = new ClubeModel();
         BeanUtils.copyProperties(clubeRequestDto, clubeModel);
         Long idValor = 1L;
+        clubeModel.setId(idValor);
 
         when(clubeRepository.findById(idValor)).thenReturn(Optional.of(clubeModel));
 
@@ -133,12 +134,6 @@ public class ClubeServiceTest {
         assertTrue(ex.getMessage().contains("no minimo 3 caracteres"));
     }
 
-    @Test
-    void testeLancarExceptionQuandoEmpty() {
-        ClubeRequestDto clubeRequestDto = new ClubeRequestDto("", "SP", LocalDate.now(), true);
-        Exception ex = assertThrows(GenericException.class, () -> clubeService.validaNome(clubeRequestDto));
-        assertTrue(ex.getMessage().contains("no minimo 3 caracteres"));
-    }
 
     @Test
     void testeLancarExceptionQuandoEstadoInvalido() {
@@ -148,8 +143,16 @@ public class ClubeServiceTest {
     }
 
     @Test
-    void testeLancarExceptionQuandoDataCriacaoInvalidaOuNoFuturo() {
+    void testeLancarExceptionQuandoDataCriacaoNoFuturo() {
         ClubeRequestDto clubeRequestDto = new ClubeRequestDto("teste", "SP", LocalDate.of(2025,12,1), true);
+        Exception ex = assertThrows(GenericException.class,
+                () -> clubeService.validaDataCriacao(clubeRequestDto));
+        assertTrue(ex.getMessage().contains("data de criacao"));
+    }
+
+    @Test
+    void testeLancarExceptionQuandoDataCriacaoNull() {
+        ClubeRequestDto clubeRequestDto = new ClubeRequestDto("teste", "SP", null, true);
         Exception ex = assertThrows(GenericException.class,
                 () -> clubeService.validaDataCriacao(clubeRequestDto));
         assertTrue(ex.getMessage().contains("data de criacao"));

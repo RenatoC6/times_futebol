@@ -29,8 +29,7 @@ public class PartidaController {
     public ResponseEntity<PartidaModel> atualizarPartida(@PathVariable Long idPartida,
                                                          @RequestBody PartidaRequestDto partidaRequestDto) {
 
-        PartidaModel partidaExistente = partidaService.acharPartida(idPartida);
-        PartidaModel partidaAtualizada = partidaService.atualizarPartida(partidaExistente,  partidaRequestDto, idPartida);
+        PartidaModel partidaAtualizada = partidaService.atualizarPartida(partidaRequestDto, idPartida);
 
         return ResponseEntity.status(HttpStatus.OK).body(partidaAtualizada);
     }

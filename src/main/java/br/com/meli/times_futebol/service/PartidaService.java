@@ -55,7 +55,9 @@ public class PartidaService {
         return partidaModel;
     }
 
-    public PartidaModel atualizarPartida(PartidaModel partidaExistente, PartidaRequestDto partidaRequestDto,Long idPartida) {
+    public PartidaModel atualizarPartida(PartidaRequestDto partidaRequestDto,Long idPartida) {
+
+        PartidaModel partidaExistente = acharPartida(idPartida);
 
         ClubeModel mandante = buscarClube(partidaRequestDto.clubeMandante(), "mandante");
         ClubeModel visitante = buscarClube(partidaRequestDto.clubeVisitante(), "visitante");
@@ -65,19 +67,22 @@ public class PartidaService {
         validaGols(partidaRequestDto);
         validaClubesIguais(partidaRequestDto);
         validaDataPatidaFutura(partidaRequestDto);
-        validarDataPosteriorCriacaoClubesEConflitoHoras(partidaRequestDto, mandante, visitante);
+
        if(!partidaExistente.getId().equals(idPartida)) {
+            validarDataPosteriorCriacaoClubesEConflitoHoras(partidaRequestDto, mandante, visitante);
             validaEstadioOcupadonaDataPartida(estadioPartida, partidaRequestDto);
             validarPartidaDuplicada(mandante, visitante, estadioPartida);
        }
 
-
-        BeanUtils.copyProperties(partidaRequestDto, partidaExistente, "id");
+        BeanUtils.copyProperties(partidaRequestDto, partidaExistente);
         partidaExistente.setClubeMandante(mandante);
         partidaExistente.setClubeVisitante(visitante);
         partidaExistente.setEstadioPartida(estadioPartida);
+        partidaExistente.setId(idPartida);
 
-        return partidaRepository.save(partidaExistente);
+        partidaRepository.save(partidaExistente);
+
+        return partidaExistente;
     }
 
 
@@ -101,48 +106,48 @@ public class PartidaService {
 
 // metdodos de validação
 
-    private ClubeModel buscarClube(Long clubeid, String tipo) {
+    public ClubeModel buscarClube(Long clubeid, String tipo) {
         return clubeRepository.findById(clubeid)
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Clube " + tipo + " não encontrado"));
     }
 
-    private EstadioModel buscarEstadio(Long estadioid) {
+    public EstadioModel buscarEstadio(Long estadioid) {
         return estadioRepository.findById(estadioid)
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Estádio não encontrado"));
     }
 
     // Verifica se os clubes estão ativos (0 (false) = ativo, 1 (true) = inativo)
-    private void validaClubeAtivo(ClubeModel mandante,ClubeModel visitante) {
+    public void validaClubeAtivo(ClubeModel mandante,ClubeModel visitante) {
         if (mandante.isAtivo() || visitante.isAtivo()) {
             throw new GenericExceptionConflict("Clube mandante ou visitante não está ativo");
         }
     }
 
-    private void validaGols(PartidaRequestDto partidaRequestDto) {
+    public void validaGols(PartidaRequestDto partidaRequestDto) {
         if (partidaRequestDto.golsMandante() < 0 || partidaRequestDto.golsVisitante() < 0) {
             throw new GenericException("Número de gols não pode ser negativo");
         }
     }
 
-    private void validaClubesIguais(PartidaRequestDto partidaRequestDto) {
+    public void validaClubesIguais(PartidaRequestDto partidaRequestDto) {
         if (partidaRequestDto.clubeMandante().equals(partidaRequestDto.clubeVisitante())) {
             throw new GenericException("Clube mandante e visitante não podem ser o mesmo");
         }
     }
 
-    private void validaDataPatidaFutura(PartidaRequestDto partidaRequestDto) {
+    public void validaDataPatidaFutura(PartidaRequestDto partidaRequestDto) {
         if (partidaRequestDto.dataPartida() == null || partidaRequestDto.dataPartida().isAfter(LocalDateTime.now())) {
             throw new GenericException("Data da partida inválida ou no futuro");
         }
     }
 
-    private void validaEstadioOcupadonaDataPartida(EstadioModel estadioPartida, PartidaRequestDto partidaRequestDto) {
+    public void validaEstadioOcupadonaDataPartida(EstadioModel estadioPartida, PartidaRequestDto partidaRequestDto) {
         if (partidaRepository.existsByEstadioPartidaAndDataPartida(estadioPartida, partidaRequestDto.dataPartida())) {
             throw new GenericExceptionConflict("Estádio já está ocupado na data da partida");
         }
     }
 
-    private void validarPartidaDuplicada(ClubeModel mandante, ClubeModel visitante, EstadioModel estadio) {
+    public void validarPartidaDuplicada(ClubeModel mandante, ClubeModel visitante, EstadioModel estadio) {
         if (partidaRepository.existsByClubeMandanteAndClubeVisitanteAndEstadioPartida(mandante, visitante, estadio)) {
             throw new GenericExceptionConflict("Já existe uma partida com mandante " +
                     mandante.getNome() + ", visitante " + visitante.getNome() +
@@ -150,7 +155,7 @@ public class PartidaService {
         }
     }
 
-    private void validarDataPosteriorCriacaoClubesEConflitoHoras(PartidaRequestDto partidaRequestDto, ClubeModel mandante, ClubeModel visitante) {
+    public void validarDataPosteriorCriacaoClubesEConflitoHoras(PartidaRequestDto partidaRequestDto, ClubeModel mandante, ClubeModel visitante) {
         LocalDateTime dataPartida = partidaRequestDto.dataPartida();
 
         if (dataPartida.toLocalDate().isBefore(mandante.getDataCriacao())) {

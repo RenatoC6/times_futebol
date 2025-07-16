@@ -13,9 +13,7 @@ import br.com.meli.times_futebol.repository.EstadioRepository;
 import br.com.meli.times_futebol.repository.PartidaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDate;
@@ -24,7 +22,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 
@@ -40,10 +37,14 @@ public class PartidaServiceTest {
     @InjectMocks
     private PartidaService partidaService;
 
+    @Captor
+    ArgumentCaptor<PartidaModel> partidaCaptor;
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
+
     @Test
     public void testeDeveCriarPartidaComDadosValidados(){
 
@@ -60,14 +61,49 @@ public class PartidaServiceTest {
         estadio.setId(22L); estadio.setNomeEstadio("estadio 22");
         when(estadioRepository.findById(22L)).thenReturn(Optional.of(estadio));
 
-        PartidaModel retornoPartida = partidaService.criarPartida(dto);
+        partidaService.criarPartida(dto);
 
-        assertNotNull(retornoPartida);
-        assertEquals(mandante, retornoPartida.getClubeMandante());
-        assertEquals(visitante, retornoPartida.getClubeVisitante());
-        assertEquals(estadio, retornoPartida.getEstadioPartida());
-        verify(partidaRepository).save(any());
+        verify(partidaRepository).save(partidaCaptor.capture());
+        PartidaModel partidaCaptorValue = partidaCaptor.getValue();
+
+        assertEquals(dto.golsMandante(), partidaCaptorValue.getGolsMandante());
+        assertEquals(dto.golsVisitante(), partidaCaptorValue.getGolsVisitante());
+        assertEquals(mandante, partidaCaptorValue.getClubeMandante());
+        assertEquals(visitante, partidaCaptorValue.getClubeVisitante());
+        assertEquals(estadio, partidaCaptorValue.getEstadioPartida());
     }
+
+    @Test
+    public void testeDeveAlterarPartidaComDadosValidados(){
+
+        PartidaRequestDto dto = new PartidaRequestDto(7L,10L, 22L, 5L, 0L, LocalDateTime.now());
+
+        ClubeModel mandante = new ClubeModel();
+        mandante.setId(7L); mandante.setNome("Mandante"); mandante.setEstado("SP"); mandante.setStatus(false); mandante.setDataCriacao(LocalDate.now());
+        when(clubeRepository.findById(7L)).thenReturn(Optional.of(mandante));
+
+        ClubeModel visitante = new ClubeModel();
+        visitante.setId(10L); visitante.setNome("Visitante"); visitante.setEstado("RJ"); visitante.setStatus(false);  visitante.setDataCriacao(LocalDate.now());
+        when(clubeRepository.findById(10L)).thenReturn(Optional.of(visitante));
+
+        EstadioModel estadio = new EstadioModel();
+        estadio.setId(22L); estadio.setNomeEstadio("estadio 22");
+        when(estadioRepository.findById(22L)).thenReturn(Optional.of(estadio));
+
+        PartidaModel partidaExistente = new PartidaModel();
+        BeanUtils.copyProperties(dto, partidaExistente);
+        Long idValor = 1L;
+        partidaExistente.setId(idValor);
+
+        when(partidaRepository.findById(idValor)).thenReturn(Optional.of(partidaExistente));
+
+        partidaService.atualizarPartida(dto, idValor);
+
+        verify(partidaRepository).save(partidaCaptor.capture());
+        PartidaModel partidaCaptorValue = partidaCaptor.getValue();
+        assertEquals(dto.golsMandante(), partidaCaptorValue.getGolsMandante());
+    }
+
 
     @Test
     public void testAcharPartidaQuandoPartidaExiste() {
@@ -192,40 +228,6 @@ public class PartidaServiceTest {
         assertTrue(ex.getMessage().contains("Já existe uma partida"));
     }
 
-    @Test
-    public void testeDeveAlterarPartidaComDadosValidados(){
-
-        PartidaRequestDto dto = new PartidaRequestDto(7L,10L, 22L, 5L, 0L, LocalDateTime.now());
-        when(partidaRepository.existsByClubeMandanteAndClubeVisitanteAndEstadioPartida(any(),any(),any())).thenReturn(false);
-        when(partidaRepository.existsByEstadioPartidaAndDataPartida(any(),any())).thenReturn(false);
-        when(partidaRepository.existsByClubeMandante_AndDataPartidaBetween(any(),any(),any())).thenReturn(false);
-        when(partidaRepository.existsByClubeVisitante_AndDataPartidaBetween(any(),any(),any())).thenReturn(false);
-
-        ClubeModel mandante = new ClubeModel();
-        mandante.setId(7L); mandante.setNome("Mandante"); mandante.setEstado("SP"); mandante.setStatus(false); mandante.setDataCriacao(LocalDate.now());
-        when(clubeRepository.findById(7L)).thenReturn(Optional.of(mandante));
-
-        ClubeModel visitante = new ClubeModel();
-        visitante.setId(10L); visitante.setNome("Visitante"); visitante.setEstado("RJ"); visitante.setStatus(false);  visitante.setDataCriacao(LocalDate.now());
-        when(clubeRepository.findById(10L)).thenReturn(Optional.of(visitante));
-
-        EstadioModel estadio = new EstadioModel();
-        estadio.setId(22L); estadio.setNomeEstadio("estadio 22");
-        when(estadioRepository.findById(22L)).thenReturn(Optional.of(estadio));
-
-        PartidaModel partidaExistente = new PartidaModel();
-        BeanUtils.copyProperties(dto, partidaExistente);
-        Long idValor = 1L;
-        partidaExistente.setId(idValor);
-
-        when(partidaRepository.findById(idValor)).thenReturn(Optional.of(partidaExistente));
-
-
-        PartidaModel retornoPartidaAtlz = partidaService.atualizarPartida(dto, idValor);
-
-        assertEquals(dto.golsMandante(), retornoPartidaAtlz.getGolsMandante());
-        verify(partidaRepository).save(any());
-    }
 
     @Test
     public void testDeveLancarExececaoQuandoPartidaNaoExisteParaAtualizar() {

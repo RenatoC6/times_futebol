@@ -1,12 +1,15 @@
 package br.com.meli.times_futebol.service;
 
+import br.com.meli.times_futebol.dto.ClubeResponseDto;
 import br.com.meli.times_futebol.enums.EstadoBr;
 import br.com.meli.times_futebol.exception.EntidadeNaoEncontradaException;
 import br.com.meli.times_futebol.exception.GenericException;
 import br.com.meli.times_futebol.dto.ClubeRequestDto;
 import br.com.meli.times_futebol.exception.GenericExceptionConflict;
 import br.com.meli.times_futebol.model.ClubeModel;
+import br.com.meli.times_futebol.model.PartidaModel;
 import br.com.meli.times_futebol.repository.ClubeRepository;
+import br.com.meli.times_futebol.repository.PartidaRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,12 +17,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class ClubeService {
 
     @Autowired
     ClubeRepository clubeRepository;
+
+    @Autowired
+    PartidaRepository partidaRepository;
 
     public ClubeModel criarTime(ClubeRequestDto clubeRequestDto) {
 
@@ -79,6 +86,63 @@ public class ClubeService {
 
         return clubeModel;
     }
+
+    public ClubeResponseDto buscaRetrospectivaClube(Long idValor) {
+
+        Long vitorias = 0L;
+        Long empates = 0L;
+        Long derrotas = 0L;
+        Long golsMarcados = 0L;
+        Long golsSofridos = 0L;
+
+        ClubeModel clubeModel = acharTime(idValor);
+
+        if(clubeModel.getStatus()) {
+            throw new GenericException("Clube: " + clubeModel.getNome() + " esta inativo");
+        }
+
+       List<PartidaModel> listaPartidas =  partidaRepository.findByClubeMandanteOrClubeVisitante(clubeModel, clubeModel);
+
+        if(listaPartidas.isEmpty()) {
+            throw new EntidadeNaoEncontradaException("Clube: " + clubeModel.getNome() + " nao possui partidas registradas");
+        }
+
+        for(PartidaModel partida : listaPartidas) {
+
+            if(partida.getClubeMandante().getId().equals(clubeModel.getId())) {
+                golsMarcados += partida.getGolsMandante();
+                golsSofridos += partida.getGolsVisitante();
+
+                if(partida.getGolsMandante() > partida.getGolsVisitante()) {
+                    vitorias++;
+                } else if(partida.getGolsMandante() < partida.getGolsVisitante()) {
+                    derrotas++;
+                } else {
+                    empates++;
+                }
+            } else {
+                golsMarcados += partida.getGolsVisitante();
+                golsSofridos += partida.getGolsMandante();
+
+                if(partida.getGolsVisitante() > partida.getGolsMandante()) {
+                    vitorias++;
+                } else if(partida.getGolsVisitante() < partida.getGolsMandante()) {
+                    derrotas++;
+                } else {
+                    empates++;
+                }
+            }
+        }
+
+        return new ClubeResponseDto(clubeModel.getNome(),
+                                               vitorias,
+                                               empates,
+                                               derrotas,
+                                               golsMarcados,
+                                               golsSofridos);
+
+    }
+
 
     // metodos validacao
 

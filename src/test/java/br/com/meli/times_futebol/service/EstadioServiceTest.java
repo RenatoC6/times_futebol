@@ -102,4 +102,10 @@ public class EstadioServiceTest {
         assertTrue(ex.getMessage().contains(" nao encontrado"));
         verify(estadioRepository).findById(idInexistente);
     }
+
+    @Test
+    public void testeQuandoDeletarEstadio() {
+        estadioService.deleteEstadio(1L);
+        verify(estadioRepository).deleteById(1L);
+    }
 }

@@ -252,5 +252,4 @@ public class PartidaServiceTest {
         assertTrue(ex.getMessage().contains("nao encontrada"));
     }
 
-
 }

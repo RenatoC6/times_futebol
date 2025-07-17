@@ -42,7 +42,7 @@ public class ApiExceptionHandler {
     // erro inesperado no acesso ao banco de dados
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGeral(Exception ex) {
-        String mensagemErro = "Erro inesperado ao salvar dados:";
+        String mensagemErro = "Erro inesperado ao buscar/salvar dados:";
         if (ex.getMessage() != null) {
             mensagemErro += " " + ex.getMessage();
         }

@@ -27,6 +27,8 @@ public class PartidaModel implements Serializable {
     @ManyToOne
     private EstadioModel estadioPartida;
 
+
+
     // getter e setter
 
 

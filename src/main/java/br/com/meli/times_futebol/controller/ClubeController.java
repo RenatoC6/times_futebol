@@ -1,5 +1,6 @@
 package br.com.meli.times_futebol.controller;
 
+import br.com.meli.times_futebol.dto.ClubeResponseDto;
 import br.com.meli.times_futebol.exception.GenericException;
 import br.com.meli.times_futebol.dto.ClubeRequestDto;
 import br.com.meli.times_futebol.model.ClubeModel;
@@ -46,7 +47,7 @@ public class ClubeController {
 
         Page<ClubeModel> clubesPage = clubeService.listarTodosTimes(pageable);
 
-        if(clubesPage.isEmpty()){
+        if (clubesPage.isEmpty()) {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new GenericException("Nenhum clube encontrado"));
         }
@@ -63,18 +64,18 @@ public class ClubeController {
         return ResponseEntity.status(HttpStatus.OK).body(clubeModel);
     }
 
-    @PutMapping ("/{idValor}")
+    @PutMapping("/{idValor}")
     public ResponseEntity<?> atualizarClube(@PathVariable Long idValor,
-                                            @RequestBody @Valid ClubeRequestDto  clubeRequestDto) {
+                                            @RequestBody @Valid ClubeRequestDto clubeRequestDto) {
 
         ClubeModel clubeModelAtlz = clubeService.atualizarTime(idValor, clubeRequestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body("Clube: " + clubeModelAtlz.getId() + ": "
-                                                                   + clubeModelAtlz.getNome() + " alterado com sucesso");
+                + clubeModelAtlz.getNome() + " alterado com sucesso");
 
     }
 
-    @DeleteMapping ("/{idValor}")
+    @DeleteMapping("/{idValor}")
     public ResponseEntity<String> deleteClube(@PathVariable Long idValor) {
 
         ClubeModel clubeModel = clubeService.inativaTime(idValor);
@@ -82,4 +83,18 @@ public class ClubeController {
         return ResponseEntity.status(HttpStatus.OK).body("clube inativado com sucesso: " + clubeModel.getNome());
 
     }
+
+    @GetMapping("retrospectiva/{idValor}")
+    public ResponseEntity<?> getRetrospectiva(@PathVariable Long idValor) {
+
+        ClubeResponseDto clubeResponseDto = clubeService.buscaRetrospectivaClube(idValor);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Retrospectiva do Clube: " + clubeResponseDto.nome() + "\n" + "\n" +
+                "Vitorias: " + clubeResponseDto.vitorias() + "\n" +
+                "Empates: " + clubeResponseDto.empates() + "\n" +
+                "Derrotas: " + clubeResponseDto.derrotas() + "\n" +
+                "Gols Marcados: " + clubeResponseDto.golsMarcados() + "\n" +
+                "Gols Sofridos: " + clubeResponseDto.golsSofridos());
+    }
+
 }

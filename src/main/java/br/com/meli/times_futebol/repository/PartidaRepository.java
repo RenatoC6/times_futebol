@@ -17,4 +17,10 @@ public interface PartidaRepository extends JpaRepository<PartidaModel, Long> {
 
     List<PartidaModel> findByClubeMandanteOrClubeVisitante(ClubeModel clubeMandante, ClubeModel clubeVisitante);
 
+    List<PartidaModel> findByClubeMandanteAndClubeVisitante(ClubeModel clubeMandante, ClubeModel clubeVisitante);
+
+
+
+
+
 }

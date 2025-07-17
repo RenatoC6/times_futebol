@@ -1,6 +1,6 @@
 package br.com.meli.times_futebol.controller;
 
-import br.com.meli.times_futebol.dto.ClubeResponseDto;
+import br.com.meli.times_futebol.dto.ClubeResponseRetrospectivaDto;
 import br.com.meli.times_futebol.exception.GenericException;
 import br.com.meli.times_futebol.dto.ClubeRequestDto;
 import br.com.meli.times_futebol.model.ClubeModel;
@@ -85,16 +85,31 @@ public class ClubeController {
     }
 
     @GetMapping("retrospectiva/{idValor}")
-    public ResponseEntity<?> getRetrospectiva(@PathVariable Long idValor) {
+    public ResponseEntity<?> listarRetrospectivaClube(@PathVariable Long idValor) {
 
-        ClubeResponseDto clubeResponseDto = clubeService.buscaRetrospectivaClube(idValor);
+        ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClube(idValor);
 
-        return ResponseEntity.status(HttpStatus.OK).body("Retrospectiva do Clube: " + clubeResponseDto.nome() + "\n" + "\n" +
-                "Vitorias: " + clubeResponseDto.vitorias() + "\n" +
-                "Empates: " + clubeResponseDto.empates() + "\n" +
-                "Derrotas: " + clubeResponseDto.derrotas() + "\n" +
-                "Gols Marcados: " + clubeResponseDto.golsMarcados() + "\n" +
-                "Gols Sofridos: " + clubeResponseDto.golsSofridos());
+        return ResponseEntity.status(HttpStatus.OK).body(clubeResponseRetrospectivaDto.mensagem() + clubeResponseRetrospectivaDto.nome() + "\n" + "\n" +
+                "Vitorias: " + clubeResponseRetrospectivaDto.vitorias() + "\n" +
+                "Empates: " + clubeResponseRetrospectivaDto.empates() + "\n" +
+                "Derrotas: " + clubeResponseRetrospectivaDto.derrotas() + "\n" +
+                "Gols Marcados: " + clubeResponseRetrospectivaDto.golsMarcados() + "\n" +
+                "Gols Sofridos: " + clubeResponseRetrospectivaDto.golsSofridos());
+    }
+
+    @GetMapping("/retrospectiva")
+    public ResponseEntity<?> listarRetrospectivaClubes(@RequestParam Long clube1,
+                                                       @RequestParam Long clube2) {
+
+        ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClubesContraAdversario(clube1, clube2);
+
+        return ResponseEntity.status(HttpStatus.OK).
+                body(clubeResponseRetrospectivaDto.mensagem()  +
+                "Vitorias: " + clubeResponseRetrospectivaDto.vitorias() + "\n" +
+                "Empates: " + clubeResponseRetrospectivaDto.empates() + "\n" +
+                "Derrotas: " + clubeResponseRetrospectivaDto.derrotas() + "\n" +
+                "Gols Marcados: " + clubeResponseRetrospectivaDto.golsMarcados() + "\n" +
+                "Gols Sofridos: " + clubeResponseRetrospectivaDto.golsSofridos());
     }
 
 }

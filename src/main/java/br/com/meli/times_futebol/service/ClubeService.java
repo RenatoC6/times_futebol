@@ -1,6 +1,6 @@
 package br.com.meli.times_futebol.service;
 
-import br.com.meli.times_futebol.dto.ClubeResponseDto;
+import br.com.meli.times_futebol.dto.ClubeResponseRetrospectivaDto;
 import br.com.meli.times_futebol.enums.EstadoBr;
 import br.com.meli.times_futebol.exception.EntidadeNaoEncontradaException;
 import br.com.meli.times_futebol.exception.GenericException;
@@ -87,13 +87,15 @@ public class ClubeService {
         return clubeModel;
     }
 
-    public ClubeResponseDto buscaRetrospectivaClube(Long idValor) {
+    public ClubeResponseRetrospectivaDto buscaRetrospectivaClube(Long idValor) {
 
+        String mensagem = "Retrospectiva do Clube: ";
         Long vitorias = 0L;
         Long empates = 0L;
         Long derrotas = 0L;
         Long golsMarcados = 0L;
         Long golsSofridos = 0L;
+        String nomeAdversario = "";
 
         ClubeModel clubeModel = acharTime(idValor);
 
@@ -134,7 +136,9 @@ public class ClubeService {
             }
         }
 
-        return new ClubeResponseDto(clubeModel.getNome(),
+        return new ClubeResponseRetrospectivaDto(mensagem,
+                                                clubeModel.getNome(),
+                                               nomeAdversario,
                                                vitorias,
                                                empates,
                                                derrotas,
@@ -143,6 +147,72 @@ public class ClubeService {
 
     }
 
+    public ClubeResponseRetrospectivaDto buscaRetrospectivaClubesContraAdversario(Long clube1, Long clube2) {
+
+        ClubeModel clubeModel1 = acharTime(clube1);
+        ClubeModel clubeModel2 = acharTime(clube2);
+
+        if(clubeModel1.getId().equals(clubeModel2.getId())) {
+            throw new GenericExceptionConflict("Os clubes nao podem ser iguais");
+        }
+        if(clubeModel1.getStatus() || clubeModel2.getStatus()) {
+            throw new GenericExceptionConflict("Um dos clubes esta inativo");
+        }
+        String mensagem;
+        Long vitorias = 0L;
+        Long empates = 0L;
+        Long derrotas = 0L;
+        Long golsMarcados = 0L;
+        Long golsSofridos = 0L;
+
+        List<PartidaModel> listaPartidas = partidaRepository.findByClubeMandanteAndClubeVisitante(clubeModel1, clubeModel2);
+
+        List<PartidaModel> listapartidas1 = partidaRepository.findByClubeMandanteAndClubeVisitante(clubeModel2, clubeModel1);
+
+        listaPartidas.addAll(listapartidas1);
+
+        if(listaPartidas.isEmpty()) {
+            mensagem = "Nenhuma partida entre o clube " + clubeModel1.getNome() + " contra o clube: " + clubeModel2.getNome() + "\n" + "\n";
+        }
+        else {
+            mensagem = "Retrospectiva do Clube " + clubeModel1.getNome() + " contra o clube: " + clubeModel2.getNome() + "\n" + "\n";
+            for(PartidaModel partida : listaPartidas) {
+                if(partida.getClubeMandante().getId().equals(clubeModel1.getId())) {
+                    golsMarcados += partida.getGolsMandante();
+                    golsSofridos += partida.getGolsVisitante();
+
+                    if(partida.getGolsMandante() > partida.getGolsVisitante()) {
+                        vitorias++;
+                    } else if(partida.getGolsMandante() < partida.getGolsVisitante()) {
+                        derrotas++;
+                    } else {
+                        empates++;
+                    }
+                } else {
+                    golsMarcados += partida.getGolsVisitante();
+                    golsSofridos += partida.getGolsMandante();
+
+                    if(partida.getGolsVisitante() > partida.getGolsMandante()) {
+                        vitorias++;
+                    } else if(partida.getGolsVisitante() < partida.getGolsMandante()) {
+                        derrotas++;
+                    } else {
+                        empates++;
+                    }
+                }
+            }
+
+        }
+
+        return new ClubeResponseRetrospectivaDto(mensagem,
+                                                clubeModel1.getNome(),
+                                               clubeModel2.getNome(),
+                                               vitorias,
+                                               empates,
+                                               derrotas,
+                                               golsMarcados,
+                                               golsSofridos);
+    }
 
     // metodos validacao
 

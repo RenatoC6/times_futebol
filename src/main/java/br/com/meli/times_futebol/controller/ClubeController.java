@@ -89,7 +89,7 @@ public class ClubeController {
 
         ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClube(idValor);
 
-        return ResponseEntity.status(HttpStatus.OK).body(clubeResponseRetrospectivaDto.mensagem() + clubeResponseRetrospectivaDto.nome() + "\n" + "\n" +
+        return ResponseEntity.status(HttpStatus.OK).body(clubeResponseRetrospectivaDto.mensagem() +
                 "Vitorias: " + clubeResponseRetrospectivaDto.vitorias() + "\n" +
                 "Empates: " + clubeResponseRetrospectivaDto.empates() + "\n" +
                 "Derrotas: " + clubeResponseRetrospectivaDto.derrotas() + "\n" +

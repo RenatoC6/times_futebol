@@ -89,7 +89,7 @@ public class ClubeService {
 
     public ClubeResponseRetrospectivaDto buscaRetrospectivaClube(Long idValor) {
 
-        String mensagem = "Retrospectiva do Clube: ";
+        String mensagem = "";
         Long vitorias = 0L;
         Long empates = 0L;
         Long derrotas = 0L;
@@ -99,39 +99,36 @@ public class ClubeService {
 
         ClubeModel clubeModel = acharTime(idValor);
 
-        if(clubeModel.getStatus()) {
-            throw new GenericException("Clube: " + clubeModel.getNome() + " esta inativo");
-        }
-
        List<PartidaModel> listaPartidas =  partidaRepository.findByClubeMandanteOrClubeVisitante(clubeModel, clubeModel);
 
         if(listaPartidas.isEmpty()) {
-            throw new EntidadeNaoEncontradaException("Clube: " + clubeModel.getNome() + " nao possui partidas registradas");
+            mensagem = "Nenhuma partida encontrada para o clube " + clubeModel.getNome() +  "\n" + "\n";
         }
+        else {
+            for (PartidaModel partida : listaPartidas) {
+                mensagem = "Retrospectiva do Clube: " + clubeModel.getNome() + "\n" + "\n";
+                if (partida.getClubeMandante().getId().equals(clubeModel.getId())) {
+                    golsMarcados += partida.getGolsMandante();
+                    golsSofridos += partida.getGolsVisitante();
 
-        for(PartidaModel partida : listaPartidas) {
-
-            if(partida.getClubeMandante().getId().equals(clubeModel.getId())) {
-                golsMarcados += partida.getGolsMandante();
-                golsSofridos += partida.getGolsVisitante();
-
-                if(partida.getGolsMandante() > partida.getGolsVisitante()) {
-                    vitorias++;
-                } else if(partida.getGolsMandante() < partida.getGolsVisitante()) {
-                    derrotas++;
+                    if (partida.getGolsMandante() > partida.getGolsVisitante()) {
+                        vitorias++;
+                    } else if (partida.getGolsMandante() < partida.getGolsVisitante()) {
+                        derrotas++;
+                    } else {
+                        empates++;
+                    }
                 } else {
-                    empates++;
-                }
-            } else {
-                golsMarcados += partida.getGolsVisitante();
-                golsSofridos += partida.getGolsMandante();
+                    golsMarcados += partida.getGolsVisitante();
+                    golsSofridos += partida.getGolsMandante();
 
-                if(partida.getGolsVisitante() > partida.getGolsMandante()) {
-                    vitorias++;
-                } else if(partida.getGolsVisitante() < partida.getGolsMandante()) {
-                    derrotas++;
-                } else {
-                    empates++;
+                    if (partida.getGolsVisitante() > partida.getGolsMandante()) {
+                        vitorias++;
+                    } else if (partida.getGolsVisitante() < partida.getGolsMandante()) {
+                        derrotas++;
+                    } else {
+                        empates++;
+                    }
                 }
             }
         }

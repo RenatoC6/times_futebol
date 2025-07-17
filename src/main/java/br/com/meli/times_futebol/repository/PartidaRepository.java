@@ -20,7 +20,4 @@ public interface PartidaRepository extends JpaRepository<PartidaModel, Long> {
     List<PartidaModel> findByClubeMandanteAndClubeVisitante(ClubeModel clubeMandante, ClubeModel clubeVisitante);
 
 
-
-
-
 }

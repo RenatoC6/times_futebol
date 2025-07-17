@@ -102,11 +102,11 @@ public class ClubeService {
        List<PartidaModel> listaPartidas =  partidaRepository.findByClubeMandanteOrClubeVisitante(clubeModel, clubeModel);
 
         if(listaPartidas.isEmpty()) {
-            mensagem = "Nenhuma partida encontrada para o clube " + clubeModel.getNome() +  "\n" + "\n";
+            mensagem = "Nenhuma partida encontrada para o clube " + clubeModel.getNome();
         }
         else {
             for (PartidaModel partida : listaPartidas) {
-                mensagem = "Retrospectiva do Clube: " + clubeModel.getNome() + "\n" + "\n";
+                mensagem = "Retrospectiva do Clube: " + clubeModel.getNome();
                 if (partida.getClubeMandante().getId().equals(clubeModel.getId())) {
                     golsMarcados += partida.getGolsMandante();
                     golsSofridos += partida.getGolsVisitante();
@@ -133,6 +133,7 @@ public class ClubeService {
             }
         }
 
+        nomeAdversario = "qualquer time";
         return new ClubeResponseRetrospectivaDto(mensagem,
                                                 clubeModel.getNome(),
                                                nomeAdversario,
@@ -168,11 +169,14 @@ public class ClubeService {
 
         listaPartidas.addAll(listapartidas1);
 
+        // Poderia ter utilizado um unico metodo no repository,utilizando a instrucao sql no (@Query) do repository
+        //List<PartidaModel> listaPartidas = partidaRepository.findPartidaEntreClubes(clubeModel1.getId(), clubeModel2.getId());
+
         if(listaPartidas.isEmpty()) {
-            mensagem = "Nenhuma partida entre o clube " + clubeModel1.getNome() + " contra o clube: " + clubeModel2.getNome() + "\n" + "\n";
+            mensagem = "Nenhuma partida entre o clube " + clubeModel1.getNome() + " contra o clube: " + clubeModel2.getNome();
         }
         else {
-            mensagem = "Retrospectiva do Clube " + clubeModel1.getNome() + " contra o clube: " + clubeModel2.getNome() + "\n" + "\n";
+            mensagem = "Retrospectiva do Clube " + clubeModel1.getNome() + " contra o clube: " + clubeModel2.getNome();
             for(PartidaModel partida : listaPartidas) {
                 if(partida.getClubeMandante().getId().equals(clubeModel1.getId())) {
                     golsMarcados += partida.getGolsMandante();

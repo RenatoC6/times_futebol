@@ -59,19 +59,19 @@ public class EstadioController {
         return ResponseEntity.status(HttpStatus.OK).body(estadiosPage);
     }
 
-    @GetMapping("/{idValor}")
-    public ResponseEntity<?> ListarEstadios(@PathVariable Long idValor) {
+    @GetMapping("/{idEstadio}")
+    public ResponseEntity<?> ListarEstadios(@PathVariable Long idEstadio) {
 
-        EstadioModel estadioModel = estadioService.acharEstadio(idValor);
+        EstadioModel estadioModel = estadioService.acharEstadio(idEstadio);
 
         return ResponseEntity.status(HttpStatus.OK).body(estadioModel);
     }
 
-    @PutMapping ("/{idValor}")
-    public ResponseEntity<?> atualizarEstadio(@PathVariable Long idValor,
+    @PutMapping ("/{idEstadio}")
+    public ResponseEntity<?> atualizarEstadio(@PathVariable Long idEstadio,
                                                    @RequestBody @Valid EstadioRequestDto estadioRequestDto) {
 
-        EstadioModel estadioModel = estadioService.acharEstadio(idValor);
+        EstadioModel estadioModel = estadioService.acharEstadio(idEstadio);
 
         EstadioModel estadioModelAtlz = estadioService.atualizarEstadio(estadioModel, estadioRequestDto);
 
@@ -79,12 +79,12 @@ public class EstadioController {
 
     }
 
-    @DeleteMapping ("/{idValor}")
-    public ResponseEntity<?> deleteEstadio(@PathVariable Long idValor) {
+    @DeleteMapping ("/{idEstadio}")
+    public ResponseEntity<?> deleteEstadio(@PathVariable Long idEstadio) {
 
-        EstadioModel estadioModel = estadioService.acharEstadio(idValor);
+        EstadioModel estadioModel = estadioService.acharEstadio(idEstadio);
 
-        estadioService.deleteEstadio(idValor);
+        estadioService.deleteEstadio(idEstadio);
 
         return ResponseEntity.status(HttpStatus.OK).body("estadio excluido com sucesso: " + ": "+ estadioModel.getNomeEstadio());
 

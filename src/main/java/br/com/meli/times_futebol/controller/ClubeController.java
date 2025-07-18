@@ -56,38 +56,38 @@ public class ClubeController {
 
     }
 
-    @GetMapping("/{idValor}")
-    public ResponseEntity<?> listarClube(@PathVariable Long idValor) {
+    @GetMapping("/{idClube}")
+    public ResponseEntity<?> listarClube(@PathVariable Long idClube) {
 
-        ClubeModel clubeModel = clubeService.acharTime(idValor);
+        ClubeModel clubeModel = clubeService.acharTime(idClube);
 
         return ResponseEntity.status(HttpStatus.OK).body(clubeModel);
     }
 
-    @PutMapping("/{idValor}")
-    public ResponseEntity<?> atualizarClube(@PathVariable Long idValor,
+    @PutMapping("/{idClube}")
+    public ResponseEntity<?> atualizarClube(@PathVariable Long idClube,
                                             @RequestBody @Valid ClubeRequestDto clubeRequestDto) {
 
-        ClubeModel clubeModelAtlz = clubeService.atualizarTime(idValor, clubeRequestDto);
+        ClubeModel clubeModelAtlz = clubeService.atualizarTime(idClube, clubeRequestDto);
 
         return ResponseEntity.status(HttpStatus.OK).body("Clube: " + clubeModelAtlz.getId() + ": "
                 + clubeModelAtlz.getNome() + " alterado com sucesso");
 
     }
 
-    @DeleteMapping("/{idValor}")
-    public ResponseEntity<String> deleteClube(@PathVariable Long idValor) {
+    @DeleteMapping("/{idClube}")
+    public ResponseEntity<String> deleteClube(@PathVariable Long idClube) {
 
-        ClubeModel clubeModel = clubeService.inativaTime(idValor);
+        ClubeModel clubeModel = clubeService.inativaTime(idClube);
 
         return ResponseEntity.status(HttpStatus.OK).body("clube inativado com sucesso: " + clubeModel.getNome());
 
     }
 
-    @GetMapping("retrospectiva/{idValor}")
-    public ResponseEntity<?> listarRetrospectivaClube(@PathVariable Long idValor) {
+    @GetMapping("retrospectiva/{idClube}")
+    public ResponseEntity<?> listarRetrospectivaClube(@PathVariable Long idClube) {
 
-        ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClube(idValor);
+        ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClube(idClube);
 
         return  ResponseEntity.status(HttpStatus.OK).body(clubeResponseRetrospectivaDto);
 

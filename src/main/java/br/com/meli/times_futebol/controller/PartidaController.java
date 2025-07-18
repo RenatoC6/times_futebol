@@ -1,12 +1,15 @@
 package br.com.meli.times_futebol.controller;
 
+
 import br.com.meli.times_futebol.dto.PartidaRequestDto;
+import br.com.meli.times_futebol.dto.PartidaResponseConfrontoDiretoDto;
 import br.com.meli.times_futebol.model.PartidaModel;
 import br.com.meli.times_futebol.service.PartidaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("partida")
@@ -15,12 +18,12 @@ public class PartidaController {
     @Autowired
     private PartidaService partidaService;
 
-     @PostMapping
-     public ResponseEntity<PartidaModel> criarPartida(@RequestBody PartidaRequestDto partidaRequestDto) {
+    @PostMapping
+    public ResponseEntity<PartidaModel> criarPartida(@RequestBody PartidaRequestDto partidaRequestDto) {
 
-         PartidaModel novaPartida = partidaService.criarPartida(partidaRequestDto);
+        PartidaModel novaPartida = partidaService.criarPartida(partidaRequestDto);
 
-         return ResponseEntity.status(HttpStatus.CREATED).body(novaPartida);
+        return ResponseEntity.status(HttpStatus.CREATED).body(novaPartida);
 
 
     }
@@ -40,6 +43,7 @@ public class PartidaController {
         PartidaModel partida = partidaService.acharPartida(idPartida);
         return ResponseEntity.status(HttpStatus.OK).body(partida);
     }
+
     @GetMapping
     public ResponseEntity<?> listarTodasPartidas(
             @RequestParam(defaultValue = "0") int page,
@@ -49,5 +53,14 @@ public class PartidaController {
         return ResponseEntity.status(HttpStatus.OK).body(partidaService.listarTodasPartidas(page, size, sort));
     }
 
+    @GetMapping("/confrontodireto")
+            public ResponseEntity<?> listarConfrontoDiretoEntreClubes(@RequestParam Long clube1,
+                                                                      @RequestParam Long clube2) {
 
+           PartidaResponseConfrontoDiretoDto partidaResponseConfrontoDiretoDto =
+                   partidaService.buscaConfrontoEntreClubes(clube1, clube2);
+
+            return ResponseEntity.status(HttpStatus.OK).body(partidaResponseConfrontoDiretoDto);
+
+    }
 }

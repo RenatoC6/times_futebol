@@ -21,10 +21,10 @@ public interface PartidaRepository extends JpaRepository<PartidaModel, Long> {
 
     List<PartidaModel> findByClubeMandanteAndClubeVisitante(ClubeModel clubeMandante, ClubeModel clubeVisitante);
 
-//    @Query("SELECT p FROM PartidaModel p WHERE " +
-//            "(p.clubeMandante.id = :clube1 AND p.clubeVisitante.id = :clube2) " +
-//            "OR " +
-//            "(p.clubeMandante.id = :clube2 AND p.clubeVisitante.id = :clube1)")
-//    List<PartidaModel> findPartidaEntreClubes(@Param("clube1") Long clube1, @Param("clube2") Long clube2);
+    @Query("SELECT p FROM PartidaModel p WHERE " +
+            "(p.clubeMandante.id = :clube1 AND p.clubeVisitante.id = :clube2) " +
+            "OR " +
+            "(p.clubeMandante.id = :clube2 AND p.clubeVisitante.id = :clube1)")
+    List<PartidaModel> findPartidaEntreClubes(@Param("clube1") Long clube1, @Param("clube2") Long clube2);
 }
 

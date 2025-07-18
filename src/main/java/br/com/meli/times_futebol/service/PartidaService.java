@@ -1,6 +1,9 @@
 package br.com.meli.times_futebol.service;
 
+
+import br.com.meli.times_futebol.dto.ClubeResponseRetrospectivaDto;
 import br.com.meli.times_futebol.dto.PartidaRequestDto;
+import br.com.meli.times_futebol.dto.PartidaResponseConfrontoDiretoDto;
 import br.com.meli.times_futebol.exception.EntidadeNaoEncontradaException;
 import br.com.meli.times_futebol.exception.GenericException;
 import br.com.meli.times_futebol.exception.GenericExceptionConflict;
@@ -19,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class PartidaService {
@@ -29,6 +33,8 @@ public class PartidaService {
     private EstadioRepository estadioRepository;
     @Autowired
     private PartidaRepository partidaRepository;
+    @Autowired
+    private ClubeService clubeService;
 
     public PartidaModel criarPartida(PartidaRequestDto partidaRequestDto) {
 
@@ -85,6 +91,25 @@ public class PartidaService {
         return partidaExistente;
     }
 
+    public PartidaResponseConfrontoDiretoDto buscaConfrontoEntreClubes(Long clube1, Long clube2) {
+
+        String mensagem;
+
+        ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto1 = clubeService.buscaRetrospectivaClubesContraAdversario(clube1, clube2);
+        ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto2 = clubeService.buscaRetrospectivaClubesContraAdversario(clube2, clube1);
+
+        List<PartidaModel> listaPartidas = partidaRepository.findPartidaEntreClubes(clube1, clube2);
+        if (!listaPartidas.isEmpty()) {
+            mensagem = ("Confronto direto entre os clubes: " + clubeResponseRetrospectivaDto1.nome() + " X " + clubeResponseRetrospectivaDto2.nome());
+        }
+        else {
+            mensagem = "Nenhuma partida encontrada entre os clubes: " + clubeResponseRetrospectivaDto1.nome() + " X " + clubeResponseRetrospectivaDto2.nome() + "/n";}
+
+        return new PartidaResponseConfrontoDiretoDto(mensagem,
+                                                    listaPartidas,
+                                                    clubeResponseRetrospectivaDto1,
+                                                    clubeResponseRetrospectivaDto2);
+    }
 
     public PartidaModel acharPartida(Long idValor) {
 

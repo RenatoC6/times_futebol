@@ -1,6 +1,7 @@
 package br.com.meli.times_futebol.service;
 
 import br.com.meli.times_futebol.dto.ClubeResponseRetrospectivaDto;
+import br.com.meli.times_futebol.dto.ClubeResponseRankingDto;
 import br.com.meli.times_futebol.enums.EstadoBr;
 import br.com.meli.times_futebol.exception.EntidadeNaoEncontradaException;
 import br.com.meli.times_futebol.exception.GenericException;
@@ -17,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -95,7 +98,7 @@ public class ClubeService {
         Long derrotas = 0L;
         Long golsMarcados = 0L;
         Long golsSofridos = 0L;
-        String nomeAdversario = "";
+        String nomeAdversario;
 
         ClubeModel clubeModel = acharTime(idValor);
 
@@ -213,6 +216,81 @@ public class ClubeService {
                                                derrotas,
                                                golsMarcados,
                                                golsSofridos);
+    }
+
+    public List<ClubeResponseRankingDto> listarRankingClubes(String tipo) {
+
+        if (!tipo.equalsIgnoreCase("vitorias") && !tipo.equalsIgnoreCase("gols")
+                && !tipo.equalsIgnoreCase("jogos")) {
+            throw new GenericException("Tipo inválido. O Total de pontos é default e Use: 'gols' / vitorias ou Jogos, para compor o segundo processo de classificacao");
+        }
+
+        String mensagem = "Ranking de clubes por pontos e: " + tipo;
+        long pontos;
+        long gols;
+        long vitorias;
+        long jogos;
+
+        List<ClubeModel> listaClubes = clubeRepository.findAll();
+
+        List<ClubeResponseRankingDto> rankingClubes = new ArrayList<>();
+
+        if(listaClubes.isEmpty()) {
+               throw new GenericExceptionConflict( "Nenhum clube cadastrado para calcular o ranking");
+        }
+
+        for (ClubeModel clube : listaClubes) {
+
+            ClubeModel clubeModel =  acharTime(clube.getId());
+            List<PartidaModel> listaPartidas = partidaRepository.findByClubeMandanteOrClubeVisitante(clubeModel,clubeModel);
+            pontos = 0L; vitorias = 0L; gols = 0L; jogos = 0L;
+            if(!listaPartidas.isEmpty()) {
+
+                for (PartidaModel partida : listaPartidas) {
+
+                    if (partida.getClubeMandante().getId().equals(clubeModel.getId())) {
+                        gols += partida.getGolsMandante();
+                        if(partida.getGolsMandante() > partida.getGolsVisitante()){
+                            pontos += 3; // vitoria
+                            vitorias++;
+                        } else if(partida.getGolsMandante().equals(partida.getGolsVisitante())) {
+                            pontos +=1;  // empate
+                        }
+
+                    } else if (partida.getClubeVisitante().getId().equals(clubeModel.getId())) {
+                        gols += partida.getGolsVisitante();
+                        if (partida.getGolsVisitante() > partida.getGolsMandante()) {
+                            pontos += 3; // vitoria
+                            vitorias++;
+                        } else if (partida.getGolsVisitante().equals(partida.getGolsMandante())) {
+                            pontos +=1; // empate
+                        }
+
+                    }
+
+                    jogos++;
+                    }
+
+                }
+
+                rankingClubes.add(new ClubeResponseRankingDto(mensagem, clubeModel.getNome(), pontos, gols, vitorias, jogos));
+            }
+
+
+        Comparator<ClubeResponseRankingDto> primary = Comparator.comparingLong(ClubeResponseRankingDto::pontos).reversed();
+
+        Comparator<ClubeResponseRankingDto> secondary;
+
+        secondary = switch (tipo.toLowerCase()) {
+            case "gols" -> Comparator.comparingLong(ClubeResponseRankingDto::gols).reversed();
+            case "vitorias" -> Comparator.comparingLong(ClubeResponseRankingDto::vitorias).reversed();
+            case "jogos" -> Comparator.comparingLong(ClubeResponseRankingDto::jogos).reversed();
+            default -> throw new GenericException("Tipo inválido. Use: 'gols' / vitorias ou Jogos, para compor o segundo processo de classificacao");
+        };
+
+        rankingClubes.sort(primary.thenComparing(secondary));
+
+        return rankingClubes;
     }
 
     // metodos validacao

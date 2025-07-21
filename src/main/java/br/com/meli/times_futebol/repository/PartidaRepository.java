@@ -26,5 +26,7 @@ public interface PartidaRepository extends JpaRepository<PartidaModel, Long> {
             "OR " +
             "(p.clubeMandante.id = :clube2 AND p.clubeVisitante.id = :clube1)")
     List<PartidaModel> findPartidaEntreClubes(@Param("clube1") Long clube1, @Param("clube2") Long clube2);
+
+
 }
 

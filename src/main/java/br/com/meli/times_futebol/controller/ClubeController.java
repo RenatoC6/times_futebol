@@ -5,6 +5,7 @@ import br.com.meli.times_futebol.exception.GenericException;
 import br.com.meli.times_futebol.dto.ClubeRequestDto;
 import br.com.meli.times_futebol.model.ClubeModel;
 import br.com.meli.times_futebol.service.ClubeService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -100,6 +101,14 @@ public class ClubeController {
         ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClubesContraAdversario(clube1, clube2);
 
         return ResponseEntity.status(HttpStatus.OK).body(clubeResponseRetrospectivaDto);
+    }
+
+
+    @GetMapping("/ranking/{tipo}")
+      public ResponseEntity<?> listarRanking(@Parameter(description = "Ranking primario é 'Pontos'. Selecione o ranking Secundario: 'gols', 'vitorias' ou 'jogos'")
+                                           @RequestParam(defaultValue = "gols") String tipo) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(clubeService.listarRankingClubes(tipo));
     }
 
 }

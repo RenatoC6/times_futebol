@@ -1,6 +1,7 @@
 package br.com.meli.times_futebol.service;
 
 import br.com.meli.times_futebol.dto.ClubeRequestDto;
+import br.com.meli.times_futebol.dto.ClubeResponseRankingDto;
 import br.com.meli.times_futebol.dto.ClubeResponseRetrospectivaDto;
 import br.com.meli.times_futebol.exception.GenericException;
 import br.com.meli.times_futebol.exception.GenericExceptionConflict;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -37,7 +37,6 @@ public class ClubeServiceTest {
     @Mock
     private ClubeModel clubeModel;
     private PartidaModel partidaModel;
-    private List<PartidaModel> listaPartidas;
 
     @InjectMocks
     private ClubeService clubeService;
@@ -272,24 +271,86 @@ public class ClubeServiceTest {
         PartidaModel partida2 = montarPartidaModelParaTestes(2L, clubeMandante, clubeVisitante, 1L, 1L);
         PartidaModel partida3 = montarPartidaModelParaTestes(3L, clubeVisitante, clubeMandante, 1L, 2L);
         PartidaModel partida4 = montarPartidaModelParaTestes(4L, clubeVisitante, clubeMandante, 2L, 1L);
+        PartidaModel partida5 = montarPartidaModelParaTestes(5L, clubeVisitante, clubeMandante, 1L, 1L);
+        PartidaModel partida6 = montarPartidaModelParaTestes(2L, clubeMandante, clubeVisitante, 0L, 1L);
 
         when(partidaRepository.findByClubeMandanteAndClubeVisitante(clubeMandante, clubeVisitante))
-                .thenReturn(new ArrayList<>(Arrays.asList(partida1, partida2)));
+                .thenReturn(new ArrayList<>(Arrays.asList(partida1, partida2, partida6)));
 
         when(partidaRepository.findByClubeMandanteAndClubeVisitante(clubeVisitante, clubeMandante))
-                .thenReturn(new ArrayList<>(Arrays.asList(partida3, partida4)));
+                .thenReturn(new ArrayList<>(Arrays.asList(partida3, partida4, partida5)));
 
         ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClubesContraAdversario(clubeMandante.getId(),clubeVisitante.getId());
 
         assertEquals("Time1", clubeResponseRetrospectivaDto.nome());
         assertEquals("Time2", clubeResponseRetrospectivaDto.nomeAdversario());
         assertEquals(2L, clubeResponseRetrospectivaDto.vitorias());
-        assertEquals(1L, clubeResponseRetrospectivaDto.empates());
-        assertEquals(1L, clubeResponseRetrospectivaDto.derrotas());
-        assertEquals(7L, clubeResponseRetrospectivaDto.golsMarcados());
-        assertEquals(5, clubeResponseRetrospectivaDto.golsSofridos());
+        assertEquals(2L, clubeResponseRetrospectivaDto.empates());
+        assertEquals(2L, clubeResponseRetrospectivaDto.derrotas());
+        assertEquals(8L, clubeResponseRetrospectivaDto.golsMarcados());
+        assertEquals(7, clubeResponseRetrospectivaDto.golsSofridos());
 
     }
+
+    @Test
+    void testeDeveRetornarExececaoRetrospectivaEntreDoisClubesQuandoClubesIguais() {
+
+        ClubeModel clubeMandante = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clubeMandante.getId())).thenReturn(Optional.of(clubeMandante));
+
+        ClubeModel clubeVisitante = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clubeVisitante.getId())).thenReturn(Optional.of(clubeVisitante));
+
+        Exception ex = assertThrows(GenericExceptionConflict.class,
+                () -> clubeService.buscaRetrospectivaClubesContraAdversario(clubeMandante.getId(),clubeVisitante.getId()));
+        assertTrue(ex.getMessage().contains("Os clubes nao podem ser iguais"));
+    }
+
+    @Test
+    void testeDeveRetornarExececaoRetrospectivaEntreDoisClubesQuandoStatusInativoParaQualquerClube() {
+
+        ClubeModel clubeMandante = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clubeMandante.getId())).thenReturn(Optional.of(clubeMandante));
+
+        ClubeModel clubeVisitante = montarClubeModelParaTestes(2L, "Time2", "SP", LocalDate.of(2025, 1, 1), true);
+        when(clubeRepository.findById(clubeVisitante.getId())).thenReturn(Optional.of(clubeVisitante));
+
+        Exception ex = assertThrows(GenericExceptionConflict.class,
+                () -> clubeService.buscaRetrospectivaClubesContraAdversario(clubeMandante.getId(),clubeVisitante.getId()));
+        assertTrue(ex.getMessage().contains("Um dos clubes esta inativo"));
+    }
+
+
+    @Test
+    void testeDeveRetornarRankingDeClubes(){
+
+        ClubeModel clube1 = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clube1.getId())).thenReturn(Optional.of(clube1));
+
+        ClubeModel clube2 = montarClubeModelParaTestes(2L, "Time2", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clube2.getId())).thenReturn(Optional.of(clube2));
+
+        List<ClubeModel> clubes = Arrays.asList(clube1, clube2);
+
+        when(clubeRepository.findAll()).thenReturn(clubes);
+
+        PartidaModel partida1 = montarPartidaModelParaTestes(1L, clube1, clube2, 3L, 1L);
+        PartidaModel partida2 = montarPartidaModelParaTestes(2L, clube1, clube2, 1L, 1L);
+        PartidaModel partida3 = montarPartidaModelParaTestes(3L, clube2, clube1, 1L, 2L);
+        PartidaModel partida4 = montarPartidaModelParaTestes(4L, clube2, clube1, 2L, 1L);
+
+        when(partidaRepository.findByClubeMandanteOrClubeVisitante(clube1, clube1))
+                .thenReturn(new ArrayList<>(Arrays.asList(partida1, partida2, partida3, partida4)));
+
+        List<ClubeResponseRankingDto> ranking = clubeService.listarRankingClubes("gols");
+
+        assertEquals(2, ranking.size());
+        assertEquals("Time1", ranking.get(0).nome());
+        assertEquals("Time2", ranking.get(1).nome());
+
+    }
+
+    // Métodos auxiliares para criar objetos de teste
 
     public ClubeModel montarClubeModelParaTestes(Long id, String nome, String estado, LocalDate dataCriacao, boolean status) {
 

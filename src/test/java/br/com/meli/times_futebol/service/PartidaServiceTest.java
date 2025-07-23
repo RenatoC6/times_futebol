@@ -1,7 +1,9 @@
 package br.com.meli.times_futebol.service;
 
 
+import br.com.meli.times_futebol.dto.ClubeResponseRetrospectivaDto;
 import br.com.meli.times_futebol.dto.PartidaRequestDto;
+import br.com.meli.times_futebol.dto.PartidaResponseConfrontoDiretoDto;
 import br.com.meli.times_futebol.exception.EntidadeNaoEncontradaException;
 import br.com.meli.times_futebol.exception.GenericException;
 import br.com.meli.times_futebol.exception.GenericExceptionConflict;
@@ -18,7 +20,7 @@ import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -33,6 +35,9 @@ public class PartidaServiceTest {
     private ClubeRepository clubeRepository;
     @Mock
     private EstadioRepository estadioRepository;
+    @Mock
+    ClubeService clubeService;
+
 
     @InjectMocks
     private PartidaService partidaService;
@@ -49,16 +54,14 @@ public class PartidaServiceTest {
     public void testeDeveCriarPartidaComDadosValidados(){
 
         PartidaRequestDto dto = new PartidaRequestDto(7L,10L, 22L, 5L, 0L, LocalDateTime.now());
-        ClubeModel mandante = new ClubeModel();
-        mandante.setId(7L); mandante.setNome("Mandante"); mandante.setEstado("SP"); mandante.setStatus(false); mandante.setDataCriacao(LocalDate.now());
+
+        ClubeModel mandante = montarClubeModelParaTestes(7L, "Mandante", "SP", LocalDate.now(), false);
         when(clubeRepository.findById(7L)).thenReturn(Optional.of(mandante));
 
-        ClubeModel visitante = new ClubeModel();
-        visitante.setId(10L); visitante.setNome("Visitante"); visitante.setEstado("RJ"); visitante.setStatus(false);  visitante.setDataCriacao(LocalDate.now());
+        ClubeModel visitante = montarClubeModelParaTestes(10L, "Visitante", "RJ", LocalDate.now(), false);
         when(clubeRepository.findById(10L)).thenReturn(Optional.of(visitante));
 
-        EstadioModel estadio = new EstadioModel();
-        estadio.setId(22L); estadio.setNomeEstadio("estadio 22");
+        EstadioModel estadio = montarEstadioModelParaTestes(22L, "estadio 22");
         when(estadioRepository.findById(22L)).thenReturn(Optional.of(estadio));
 
         partidaService.criarPartida(dto);
@@ -78,16 +81,13 @@ public class PartidaServiceTest {
 
         PartidaRequestDto dto = new PartidaRequestDto(7L,10L, 22L, 5L, 0L, LocalDateTime.now());
 
-        ClubeModel mandante = new ClubeModel();
-        mandante.setId(7L); mandante.setNome("Mandante"); mandante.setEstado("SP"); mandante.setStatus(false); mandante.setDataCriacao(LocalDate.now());
+        ClubeModel mandante = montarClubeModelParaTestes(7L, "Mandante", "SP", LocalDate.now(), false);
         when(clubeRepository.findById(7L)).thenReturn(Optional.of(mandante));
 
-        ClubeModel visitante = new ClubeModel();
-        visitante.setId(10L); visitante.setNome("Visitante"); visitante.setEstado("RJ"); visitante.setStatus(false);  visitante.setDataCriacao(LocalDate.now());
+        ClubeModel visitante = montarClubeModelParaTestes(10L, "Visitante", "RJ", LocalDate.now(), false);
         when(clubeRepository.findById(10L)).thenReturn(Optional.of(visitante));
 
-        EstadioModel estadio = new EstadioModel();
-        estadio.setId(22L); estadio.setNomeEstadio("estadio 22");
+        EstadioModel estadio = montarEstadioModelParaTestes(22L, "estadio 22");
         when(estadioRepository.findById(22L)).thenReturn(Optional.of(estadio));
 
         PartidaModel partidaExistente = new PartidaModel();
@@ -250,6 +250,76 @@ public class PartidaServiceTest {
                 () -> partidaService.acharPartida(idValor));
 
         assertTrue(ex.getMessage().contains("nao encontrada"));
+    }
+
+    @Test
+    void testeDeveRetornarConfrontoDiretoEntreDoisClubesComDadosValidos() {
+
+        ClubeModel clubeMandante = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clubeMandante.getId())).thenReturn(Optional.of(clubeMandante));
+
+        ClubeModel clubeVisitante = montarClubeModelParaTestes(2L, "Time2", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clubeVisitante.getId())).thenReturn(Optional.of(clubeVisitante));
+
+        when(clubeService.buscaRetrospectivaClubesContraAdversario(1L, 2L))
+        .thenReturn(new ClubeResponseRetrospectivaDto("Confronto direto entre os clubes",
+                clubeMandante.getNome(),
+                clubeVisitante.getNome(),
+                2L, 2L, 2L, 8L, 7L));
+
+        when(clubeService.buscaRetrospectivaClubesContraAdversario(2L, 1L))
+                .thenReturn(new ClubeResponseRetrospectivaDto("Confronto direto entre os clubes",
+                        clubeVisitante.getNome(),
+                        clubeMandante.getNome(),
+                        2L, 2L, 2L, 7L, 8L));
+
+        PartidaModel partida1 = montarPartidaModelParaTestes(1L, clubeMandante, clubeVisitante, 3L, 1L);
+        PartidaModel partida2 = montarPartidaModelParaTestes(2L, clubeMandante, clubeVisitante, 1L, 1L);
+        PartidaModel partida3 = montarPartidaModelParaTestes(3L, clubeVisitante, clubeMandante, 1L, 2L);
+
+        when(partidaRepository.findPartidaEntreClubes(1L, 2L))
+                .thenReturn(new ArrayList<>(Arrays.asList(partida1, partida2, partida3)));
+
+        PartidaResponseConfrontoDiretoDto  partidaResponseConfrontoDiretoDto = partidaService.buscaConfrontoEntreClubes(clubeMandante.getId(), clubeVisitante.getId());
+
+        assertEquals("Time1", partidaResponseConfrontoDiretoDto.clubeResponseRetrospectivaDto1().nome());
+        assertEquals("Time2", partidaResponseConfrontoDiretoDto.clubeResponseRetrospectivaDto2().nome());
+        assertEquals(2L, partidaResponseConfrontoDiretoDto.clubeResponseRetrospectivaDto1().vitorias());
+        assertEquals(2L, partidaResponseConfrontoDiretoDto.clubeResponseRetrospectivaDto1().empates());
+        assertEquals(2L, partidaResponseConfrontoDiretoDto.clubeResponseRetrospectivaDto1().derrotas());
+        assertEquals(8L, partidaResponseConfrontoDiretoDto.clubeResponseRetrospectivaDto1().golsMarcados());
+        assertEquals(7, partidaResponseConfrontoDiretoDto.clubeResponseRetrospectivaDto1().golsSofridos());
+
+    }
+
+    // Métodos auxiliares para criar objetos de teste
+
+    public ClubeModel montarClubeModelParaTestes(Long id, String nome, String estado, LocalDate dataCriacao, boolean status) {
+
+        ClubeModel clubeModel = new ClubeModel();
+        clubeModel.setId(id);
+        clubeModel.setNome(nome);
+        clubeModel.setEstado(estado);
+        clubeModel.setDataCriacao(dataCriacao);
+        clubeModel.setStatus(status);
+        return  clubeModel;
+    }
+
+    public PartidaModel montarPartidaModelParaTestes(Long id, ClubeModel clubeMandante, ClubeModel clubeVisitante, Long golsMandante, Long golsVisitante) {
+        PartidaModel partidaModel = new PartidaModel();
+        partidaModel.setId(id);
+        partidaModel.setClubeMandante(clubeMandante);
+        partidaModel.setClubeVisitante(clubeVisitante);
+        partidaModel.setGolsMandante(golsMandante);
+        partidaModel.setGolsVisitante(golsVisitante);
+        return partidaModel;
+    }
+
+    public EstadioModel montarEstadioModelParaTestes(Long id, String nome) {
+        EstadioModel estadioModel = new EstadioModel();
+        estadioModel.setId(id);
+        estadioModel.setNomeEstadio(nome);
+        return estadioModel;
     }
 
 }

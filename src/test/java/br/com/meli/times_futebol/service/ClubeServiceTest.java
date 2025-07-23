@@ -20,9 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -261,37 +259,37 @@ public class ClubeServiceTest {
         assertEquals(0L, clubeResponseRetrospectivaDto.golsSofridos());
     }
 
-//    @Test
-//    void testeDeveRetornarRetrospectivaEntreDoisClubesComDadosValidos() {
-//
-//        ClubeModel clubeMandante = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
-//        when(clubeRepository.findById(clubeMandante.getId())).thenReturn(Optional.of(clubeMandante));
-//
-//        ClubeModel clubeVisitante = montarClubeModelParaTestes(2L, "Time2", "SP", LocalDate.of(2025, 1, 1), false);
-//        when(clubeRepository.findById(clubeVisitante.getId())).thenReturn(Optional.of(clubeVisitante));
-//
-//        PartidaModel partida1 = montarPartidaModelParaTestes(1L, clubeMandante, clubeVisitante, 3L, 1L);
-//
-//        PartidaModel partida2 = montarPartidaModelParaTestes(2L, clubeMandante, clubeVisitante, 1L, 1L);
-//
-//        PartidaModel partida3 = montarPartidaModelParaTestes(3L, clubeMandante, clubeVisitante, 1L, 2L);
-//
-//
-////        when(partidaRepository.findByClubeMandanteAndClubeVisitante(partida1.getClubeMandante(), clubeVisitante))
-////                .thenReturn(List.of(partida1, partida2, partida3));
-////        // Quando addAll for chamado, retorne true
-////        when(partida1.addAll(Collections.singletonList(partida2))).thenReturn(true);
-//
-//        ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClubesContraAdversario(clubeMandante.getId(),clubeVisitante.getId());
-//
-//        assertEquals("Time2", clubeResponseRetrospectivaDto.nome());
-//        assertEquals(1L, clubeResponseRetrospectivaDto.vitorias());
-//        assertEquals(1L, clubeResponseRetrospectivaDto.empates());
-//        assertEquals(1L, clubeResponseRetrospectivaDto.derrotas());
-//        assertEquals(4L, clubeResponseRetrospectivaDto.golsMarcados());
-//        assertEquals(5L, clubeResponseRetrospectivaDto.golsSofridos());
-//
-//    }
+    @Test
+    void testeDeveRetornarRetrospectivaEntreDoisClubesComDadosValidos() {
+
+        ClubeModel clubeMandante = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clubeMandante.getId())).thenReturn(Optional.of(clubeMandante));
+
+        ClubeModel clubeVisitante = montarClubeModelParaTestes(2L, "Time2", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clubeVisitante.getId())).thenReturn(Optional.of(clubeVisitante));
+
+        PartidaModel partida1 = montarPartidaModelParaTestes(1L, clubeMandante, clubeVisitante, 3L, 1L);
+        PartidaModel partida2 = montarPartidaModelParaTestes(2L, clubeMandante, clubeVisitante, 1L, 1L);
+        PartidaModel partida3 = montarPartidaModelParaTestes(3L, clubeVisitante, clubeMandante, 1L, 2L);
+        PartidaModel partida4 = montarPartidaModelParaTestes(4L, clubeVisitante, clubeMandante, 2L, 1L);
+
+        when(partidaRepository.findByClubeMandanteAndClubeVisitante(clubeMandante, clubeVisitante))
+                .thenReturn(new ArrayList<>(Arrays.asList(partida1, partida2)));
+
+        when(partidaRepository.findByClubeMandanteAndClubeVisitante(clubeVisitante, clubeMandante))
+                .thenReturn(new ArrayList<>(Arrays.asList(partida3, partida4)));
+
+        ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClubesContraAdversario(clubeMandante.getId(),clubeVisitante.getId());
+
+        assertEquals("Time1", clubeResponseRetrospectivaDto.nome());
+        assertEquals("Time2", clubeResponseRetrospectivaDto.nomeAdversario());
+        assertEquals(2L, clubeResponseRetrospectivaDto.vitorias());
+        assertEquals(1L, clubeResponseRetrospectivaDto.empates());
+        assertEquals(1L, clubeResponseRetrospectivaDto.derrotas());
+        assertEquals(7L, clubeResponseRetrospectivaDto.golsMarcados());
+        assertEquals(5, clubeResponseRetrospectivaDto.golsSofridos());
+
+    }
 
     public ClubeModel montarClubeModelParaTestes(Long id, String nome, String estado, LocalDate dataCriacao, boolean status) {
 

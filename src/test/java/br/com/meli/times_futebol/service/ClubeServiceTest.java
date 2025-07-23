@@ -70,14 +70,10 @@ public class ClubeServiceTest {
         ClubeRequestDto clubeRequestDto = new ClubeRequestDto("teste", "SP", LocalDate.of(2025,1,1), false);
         when(clubeRepository.existsByNomeIgnoreCase(any())).thenReturn(false);
 
-        ClubeModel clubeModel = new ClubeModel();
-        BeanUtils.copyProperties(clubeRequestDto, clubeModel);
-        Long idValor = 1L;
-        clubeModel.setId(idValor);
+        ClubeModel clubeModel = montarClubeModelParaTestes(1L, "teste", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clubeModel.getId())).thenReturn(Optional.of(clubeModel));
 
-        when(clubeRepository.findById(idValor)).thenReturn(Optional.of(clubeModel));
-
-        ClubeModel clubeModelAtlz = clubeService.atualizarTime(idValor, clubeRequestDto);
+        ClubeModel clubeModelAtlz = clubeService.atualizarTime(clubeModel.getId(), clubeRequestDto);
 
         assertEquals(clubeRequestDto.nome(), clubeModelAtlz.getNome());
         assertEquals(clubeRequestDto.estado(), clubeModelAtlz.getEstado());
@@ -87,27 +83,25 @@ public class ClubeServiceTest {
     @Test
     public void testeDeveRetornarClubeQuandoExiste() {
         // Arrange
-        Long idValor = 1L;
-        ClubeModel clubeEsperado = new ClubeModel();
-        clubeEsperado.setId(idValor);
-        when(clubeRepository.findById(idValor)).thenReturn(Optional.of(clubeEsperado));
+        ClubeModel clubeEsperado = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
+
+        when(clubeRepository.findById(clubeEsperado.getId())).thenReturn(Optional.of(clubeEsperado));
 
         // Act
-        ClubeModel clubeRetornado = clubeService.acharTime(idValor);
+        ClubeModel clubeRetornado = clubeService.acharTime(clubeEsperado.getId());
 
         // Assert
-        assertEquals(idValor, clubeRetornado.getId());
-        verify(clubeRepository).findById(idValor);
+        assertEquals(clubeEsperado.getId(), clubeRetornado.getId());
+        verify(clubeRepository).findById(clubeRetornado.getId());
 
     }
     @Test
     public void testeDeveInativarClube(){
-        Long idValor = 1L;
-        ClubeModel clubeEsperado = new ClubeModel();
-        clubeEsperado.setId(idValor);
-        when(clubeRepository.findById(idValor)).thenReturn(Optional.of(clubeEsperado));
 
-        ClubeModel clubeRetornado = clubeService.inativaTime(idValor);
+        ClubeModel clubeEsperado = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), true);
+        when(clubeRepository.findById(clubeEsperado.getId())).thenReturn(Optional.of(clubeEsperado));
+
+        ClubeModel clubeRetornado = clubeService.inativaTime(clubeEsperado.getId());
 
         assertEquals(true, clubeRetornado.getStatus());
         verify(clubeRepository).save(any());
@@ -117,12 +111,10 @@ public class ClubeServiceTest {
     @Test
     void listarTodosTimesDeveRetornarPageComTimes() {
         Pageable pageable = PageRequest.of(0, 10);
-        ClubeModel clube1 = new ClubeModel();
-        clube1.setId(1L);
-        clube1.setNome("Time1");
-        ClubeModel clube2 = new ClubeModel();
-        clube2.setId(2L);
-        clube2.setNome("Time2");
+
+        ClubeModel clube1 = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
+
+        ClubeModel clube2 = montarClubeModelParaTestes(2L, "Time2", "SP", LocalDate.of(2025, 1, 1), false);
 
         List<ClubeModel> clubes = List.of(clube1, clube2);
         Page<ClubeModel> page = new PageImpl<>(clubes, pageable, clubes.size());

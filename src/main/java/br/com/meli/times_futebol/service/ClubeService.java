@@ -108,8 +108,9 @@ public class ClubeService {
             mensagem = "Nenhuma partida encontrada para o clube " + clubeModel.getNome();
         }
         else {
+            mensagem = "Retrospectiva do Clube: " + clubeModel.getNome();
             for (PartidaModel partida : listaPartidas) {
-                mensagem = "Retrospectiva do Clube: " + clubeModel.getNome();
+
                 if (partida.getClubeMandante().getId().equals(clubeModel.getId())) {
                     golsMarcados += partida.getGolsMandante();
                     golsSofridos += partida.getGolsVisitante();
@@ -171,9 +172,6 @@ public class ClubeService {
         List<PartidaModel> listapartidas1 = partidaRepository.findByClubeMandanteAndClubeVisitante(clubeModel2, clubeModel1);
 
         listaPartidas.addAll(listapartidas1);
-
-        // Poderia ter utilizado um unico metodo no repository,utilizando a instrucao sql no (@Query) do repository
-        //List<PartidaModel> listaPartidas = partidaRepository.findPartidaEntreClubes(clubeModel1.getId(), clubeModel2.getId());
 
         if(listaPartidas.isEmpty()) {
             mensagem = "Nenhuma partida entre o clube " + clubeModel1.getNome() + " contra o clube: " + clubeModel2.getNome();

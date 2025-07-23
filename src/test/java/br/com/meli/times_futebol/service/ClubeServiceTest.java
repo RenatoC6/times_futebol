@@ -1,10 +1,13 @@
 package br.com.meli.times_futebol.service;
 
 import br.com.meli.times_futebol.dto.ClubeRequestDto;
+import br.com.meli.times_futebol.dto.ClubeResponseRetrospectivaDto;
 import br.com.meli.times_futebol.exception.GenericException;
 import br.com.meli.times_futebol.exception.GenericExceptionConflict;
 import br.com.meli.times_futebol.model.ClubeModel;
+import br.com.meli.times_futebol.model.PartidaModel;
 import br.com.meli.times_futebol.repository.ClubeRepository;
+import br.com.meli.times_futebol.repository.PartidaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -17,21 +20,30 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class ClubeServiceTest {
 
     @Mock
     private ClubeRepository clubeRepository;
 
+    @Mock
+    private PartidaRepository partidaRepository;
+
+    @Mock
+    private ClubeModel clubeModel;
+    private PartidaModel partidaModel;
+    private List<PartidaModel> listaPartidas;
+
     @InjectMocks
     private ClubeService clubeService;
+
 
     @BeforeEach
     void setUp() {
@@ -165,5 +177,150 @@ public class ClubeServiceTest {
         Exception ex = assertThrows(GenericExceptionConflict.class,
                 () -> clubeService.validaNomeExistente(clubeRequestDto));
         assertTrue(ex.getMessage().contains(" ja cadastrado"));
+    }
+    @Test
+   void testeDeveRetornarMensagemQuandoListaPartidasVaziaNaBuscaRestropectiva() {
+
+        ClubeModel clube = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
+
+        when(clubeRepository.findById(clube.getId())).thenReturn(Optional.of(clube));
+        when(partidaRepository.findByClubeMandanteOrClubeVisitante(clube,clube)).thenReturn(Collections.emptyList());
+
+        ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClube(clube.getId());
+
+        assertEquals("Nenhuma partida encontrada para o clube Time1", clubeResponseRetrospectivaDto.mensagem());
+        assertEquals(0L, clubeResponseRetrospectivaDto.vitorias());
+        assertEquals(0L, clubeResponseRetrospectivaDto.empates());
+        assertEquals(0L, clubeResponseRetrospectivaDto.derrotas());
+        assertEquals(0L, clubeResponseRetrospectivaDto.golsMarcados());
+        assertEquals(0L, clubeResponseRetrospectivaDto.golsSofridos());
+    }
+    @Test
+    void testeDeveRetornarRetrospectivaClubeMandanteComDadosValidos() {
+
+        ClubeModel clube1 = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clube1.getId())).thenReturn(Optional.of(clube1));
+
+        PartidaModel partida1 = montarPartidaModelParaTestes(1L, clube1, clube1, 3L, 1L);
+
+        PartidaModel partida2 = montarPartidaModelParaTestes(2L, clube1, clube1, 1L, 1L);
+
+        PartidaModel partida3 = montarPartidaModelParaTestes(3L, clube1, clube1, 1L, 2L);
+
+        when(partidaRepository.findByClubeMandanteOrClubeVisitante(clube1, clube1))
+                .thenReturn(List.of(partida1, partida2, partida3));
+
+        ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClube(clube1.getId());
+
+        assertEquals("Time1", clubeResponseRetrospectivaDto.nome());
+        assertEquals(1L, clubeResponseRetrospectivaDto.vitorias());
+        assertEquals(1L, clubeResponseRetrospectivaDto.empates());
+        assertEquals(1L, clubeResponseRetrospectivaDto.derrotas());
+        assertEquals(5L, clubeResponseRetrospectivaDto.golsMarcados());
+        assertEquals(4L, clubeResponseRetrospectivaDto.golsSofridos());
+    }
+
+    @Test
+    void testeDeveRetornarRetrospectivaClubeVisitanteComDadosValidos() {
+
+        ClubeModel clubeMandante = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clubeMandante.getId())).thenReturn(Optional.of(clubeMandante));
+
+        ClubeModel clubeVisitante = montarClubeModelParaTestes(2L, "Time2", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clubeVisitante.getId())).thenReturn(Optional.of(clubeVisitante));
+
+        PartidaModel partida1 = montarPartidaModelParaTestes(1L, clubeMandante, clubeVisitante, 3L, 1L);
+
+        PartidaModel partida2 = montarPartidaModelParaTestes(2L, clubeMandante, clubeVisitante, 1L, 1L);
+
+        PartidaModel partida3 = montarPartidaModelParaTestes(3L, clubeMandante, clubeVisitante, 1L, 2L);
+
+        when(partidaRepository.findByClubeMandanteOrClubeVisitante(clubeVisitante, clubeVisitante))
+                .thenReturn(List.of(partida1, partida2, partida3));
+
+        ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClube(clubeVisitante.getId());
+
+        assertEquals("Time2", clubeResponseRetrospectivaDto.nome());
+        assertEquals(1L, clubeResponseRetrospectivaDto.vitorias());
+        assertEquals(1L, clubeResponseRetrospectivaDto.empates());
+        assertEquals(1L, clubeResponseRetrospectivaDto.derrotas());
+        assertEquals(4L, clubeResponseRetrospectivaDto.golsMarcados());
+        assertEquals(5L, clubeResponseRetrospectivaDto.golsSofridos());
+    }
+
+    @Test
+    void testeDeveRetornarMensagemQuandoListaPartidasVaziaNaBuscaRestropectivaEntreDoisTimes() {
+
+        ClubeModel clubeMandante = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clubeMandante.getId())).thenReturn(Optional.of(clubeMandante));
+
+        ClubeModel clubeVisitante = montarClubeModelParaTestes(2L, "Time2", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clubeVisitante.getId())).thenReturn(Optional.of(clubeVisitante));
+
+        when(partidaRepository.findByClubeMandanteOrClubeVisitante(clubeMandante,clubeVisitante)).thenReturn(Collections.emptyList());
+
+        ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClubesContraAdversario(clubeMandante.getId(), clubeVisitante.getId());
+
+        assertEquals( "Nenhuma partida entre o clube " + clubeMandante.getNome() + " contra o clube: " + clubeVisitante.getNome(), clubeResponseRetrospectivaDto.mensagem());
+        assertEquals(0L, clubeResponseRetrospectivaDto.vitorias());
+        assertEquals(0L, clubeResponseRetrospectivaDto.empates());
+        assertEquals(0L, clubeResponseRetrospectivaDto.derrotas());
+        assertEquals(0L, clubeResponseRetrospectivaDto.golsMarcados());
+        assertEquals(0L, clubeResponseRetrospectivaDto.golsSofridos());
+    }
+
+//    @Test
+//    void testeDeveRetornarRetrospectivaEntreDoisClubesComDadosValidos() {
+//
+//        ClubeModel clubeMandante = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
+//        when(clubeRepository.findById(clubeMandante.getId())).thenReturn(Optional.of(clubeMandante));
+//
+//        ClubeModel clubeVisitante = montarClubeModelParaTestes(2L, "Time2", "SP", LocalDate.of(2025, 1, 1), false);
+//        when(clubeRepository.findById(clubeVisitante.getId())).thenReturn(Optional.of(clubeVisitante));
+//
+//        PartidaModel partida1 = montarPartidaModelParaTestes(1L, clubeMandante, clubeVisitante, 3L, 1L);
+//
+//        PartidaModel partida2 = montarPartidaModelParaTestes(2L, clubeMandante, clubeVisitante, 1L, 1L);
+//
+//        PartidaModel partida3 = montarPartidaModelParaTestes(3L, clubeMandante, clubeVisitante, 1L, 2L);
+//
+//
+////        when(partidaRepository.findByClubeMandanteAndClubeVisitante(partida1.getClubeMandante(), clubeVisitante))
+////                .thenReturn(List.of(partida1, partida2, partida3));
+////        // Quando addAll for chamado, retorne true
+////        when(partida1.addAll(Collections.singletonList(partida2))).thenReturn(true);
+//
+//        ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClubesContraAdversario(clubeMandante.getId(),clubeVisitante.getId());
+//
+//        assertEquals("Time2", clubeResponseRetrospectivaDto.nome());
+//        assertEquals(1L, clubeResponseRetrospectivaDto.vitorias());
+//        assertEquals(1L, clubeResponseRetrospectivaDto.empates());
+//        assertEquals(1L, clubeResponseRetrospectivaDto.derrotas());
+//        assertEquals(4L, clubeResponseRetrospectivaDto.golsMarcados());
+//        assertEquals(5L, clubeResponseRetrospectivaDto.golsSofridos());
+//
+//    }
+
+    public ClubeModel montarClubeModelParaTestes(Long id, String nome, String estado, LocalDate dataCriacao, boolean status) {
+
+        clubeModel = new ClubeModel();
+        clubeModel.setId(id);
+        clubeModel.setNome(nome);
+        clubeModel.setEstado(estado);
+        clubeModel.setDataCriacao(dataCriacao);
+        clubeModel.setStatus(status);
+
+        return  clubeModel;
+    }
+
+    public PartidaModel montarPartidaModelParaTestes(Long id, ClubeModel clubeMandante, ClubeModel clubeVisitante, Long golsMandante, Long golsVisitante) {
+        partidaModel = new PartidaModel();
+        partidaModel.setId(id);
+        partidaModel.setClubeMandante(clubeMandante);
+        partidaModel.setClubeVisitante(clubeVisitante);
+        partidaModel.setGolsMandante(golsMandante);
+        partidaModel.setGolsVisitante(golsVisitante);
+
+        return partidaModel;
     }
 }

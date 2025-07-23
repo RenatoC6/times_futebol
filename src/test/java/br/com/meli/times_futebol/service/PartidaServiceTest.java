@@ -107,16 +107,14 @@ public class PartidaServiceTest {
 
     @Test
     public void testAcharPartidaQuandoPartidaExiste() {
-        // Arrange
+
         Long idValor = 1L;
         PartidaModel partidaEsperada = new PartidaModel();
         partidaEsperada.setId(idValor);
         when(partidaRepository.findById(idValor)).thenReturn(Optional.of(partidaEsperada));
 
-        // Act
         PartidaModel partidaResultado = partidaService.acharPartida(idValor);
 
-        // Assert
         assertEquals(partidaEsperada, partidaResultado);
         verify(partidaRepository).findById(idValor);
     }

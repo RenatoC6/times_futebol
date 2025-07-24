@@ -51,9 +51,9 @@ public class PartidaServiceTest {
     }
 
     @Test
-    public void testeDeveCriarPartidaComDadosValidados(){
+    public void testeDeveCriarPartidaComDadosValidados() {
 
-        PartidaRequestDto dto = new PartidaRequestDto(7L,10L, 22L, 5L, 0L, LocalDateTime.now());
+        PartidaRequestDto dto = new PartidaRequestDto(7L, 10L, 22L, 5L, 0L, LocalDateTime.now());
 
         ClubeModel mandante = montarClubeModelParaTestes(7L, "Mandante", "SP", LocalDate.now(), false);
         when(clubeRepository.findById(7L)).thenReturn(Optional.of(mandante));
@@ -77,9 +77,9 @@ public class PartidaServiceTest {
     }
 
     @Test
-    public void testeDeveAlterarPartidaComDadosValidados(){
+    public void testeDeveAlterarPartidaComDadosValidados() {
 
-        PartidaRequestDto dto = new PartidaRequestDto(7L,10L, 22L, 5L, 0L, LocalDateTime.now());
+        PartidaRequestDto dto = new PartidaRequestDto(7L, 10L, 22L, 5L, 0L, LocalDateTime.now());
 
         ClubeModel mandante = montarClubeModelParaTestes(7L, "Mandante", "SP", LocalDate.now(), false);
         when(clubeRepository.findById(7L)).thenReturn(Optional.of(mandante));
@@ -166,11 +166,19 @@ public class PartidaServiceTest {
     public void testCriarPartidaDeveLancarExceptionSeClubeInativo() {
 
         ClubeModel mandante = new ClubeModel();
-        mandante.setId(7L); mandante.setNome("Mandante"); mandante.setEstado("SP"); mandante.setStatus(false); mandante.setDataCriacao(LocalDate.now());
+        mandante.setId(7L);
+        mandante.setNome("Mandante");
+        mandante.setEstado("SP");
+        mandante.setStatus(false);
+        mandante.setDataCriacao(LocalDate.now());
         when(clubeRepository.findById(10L)).thenReturn(Optional.of(mandante));
 
         ClubeModel visitante = new ClubeModel();
-        visitante.setId(10L); visitante.setNome("Visitante"); visitante.setEstado("RJ"); visitante.setStatus(true);  visitante.setDataCriacao(LocalDate.now());
+        visitante.setId(10L);
+        visitante.setNome("Visitante");
+        visitante.setEstado("RJ");
+        visitante.setStatus(true);
+        visitante.setDataCriacao(LocalDate.now());
         when(clubeRepository.findById(10L)).thenReturn(Optional.of(visitante));
 
         Exception ex = assertThrows(GenericExceptionConflict.class, () -> partidaService.validaClubeAtivo(mandante, visitante));
@@ -181,7 +189,7 @@ public class PartidaServiceTest {
 
     @Test
     public void testCriarPartidaDeveLancarExceptionSeDataPartidaFutura() {
-        PartidaRequestDto dto = new PartidaRequestDto(7L,10L, 22L, 5L, 0L, LocalDateTime.now().plusDays(1));
+        PartidaRequestDto dto = new PartidaRequestDto(7L, 10L, 22L, 5L, 0L, LocalDateTime.now().plusDays(1));
 
         Exception ex = assertThrows(GenericException.class, () -> partidaService.validaDataPatidaFutura(dto));
 
@@ -190,9 +198,10 @@ public class PartidaServiceTest {
 
     @Test
     public void testCriarPartidaDeveLancarExceptionSeEstadioOcupadoNaDataPartida() {
-        PartidaRequestDto dto = new PartidaRequestDto(7L,10L, 22L, 5L, 0L, LocalDateTime.now());
+        PartidaRequestDto dto = new PartidaRequestDto(7L, 10L, 22L, 5L, 0L, LocalDateTime.now());
         EstadioModel estadio = new EstadioModel();
-        estadio.setId(22L); estadio.setNomeEstadio("estadio 22");
+        estadio.setId(22L);
+        estadio.setNomeEstadio("estadio 22");
         when(estadioRepository.findById(22L)).thenReturn(Optional.of(estadio));
         when(partidaRepository.existsByEstadioPartidaAndDataPartida(estadio, dto.dataPartida())).thenReturn(true);
 
@@ -206,15 +215,24 @@ public class PartidaServiceTest {
     public void testCriarPartidaDeveLancarExceptionSePartidaDuplicada() {
 
         ClubeModel mandante = new ClubeModel();
-        mandante.setId(7L); mandante.setNome("Mandante"); mandante.setEstado("SP"); mandante.setStatus(false); mandante.setDataCriacao(LocalDate.now());
+        mandante.setId(7L);
+        mandante.setNome("Mandante");
+        mandante.setEstado("SP");
+        mandante.setStatus(false);
+        mandante.setDataCriacao(LocalDate.now());
         when(clubeRepository.findById(7L)).thenReturn(Optional.of(mandante));
 
         ClubeModel visitante = new ClubeModel();
-        visitante.setId(10L); visitante.setNome("Visitante"); visitante.setEstado("RJ"); visitante.setStatus(false);  visitante.setDataCriacao(LocalDate.now());
+        visitante.setId(10L);
+        visitante.setNome("Visitante");
+        visitante.setEstado("RJ");
+        visitante.setStatus(false);
+        visitante.setDataCriacao(LocalDate.now());
         when(clubeRepository.findById(10L)).thenReturn(Optional.of(visitante));
 
         EstadioModel estadio = new EstadioModel();
-        estadio.setId(22L); estadio.setNomeEstadio("estadio 22");
+        estadio.setId(22L);
+        estadio.setNomeEstadio("estadio 22");
         when(estadioRepository.findById(22L)).thenReturn(Optional.of(estadio));
 
         when(partidaRepository.existsByClubeMandanteAndClubeVisitanteAndEstadioPartida(mandante, visitante, estadio)).
@@ -229,7 +247,7 @@ public class PartidaServiceTest {
 
     @Test
     public void testDeveLancarExececaoQuandoPartidaNaoExisteParaAtualizar() {
-        PartidaRequestDto dto = new PartidaRequestDto(7L,10L, 22L, 5L, 0L, LocalDateTime.now());
+        PartidaRequestDto dto = new PartidaRequestDto(7L, 10L, 22L, 5L, 0L, LocalDateTime.now());
         Long idValor = 1L;
         when(partidaRepository.findById(idValor)).thenReturn(Optional.empty());
 
@@ -260,10 +278,10 @@ public class PartidaServiceTest {
         when(clubeRepository.findById(clubeVisitante.getId())).thenReturn(Optional.of(clubeVisitante));
 
         when(clubeService.buscaRetrospectivaClubesContraAdversario(1L, 2L))
-        .thenReturn(new ClubeResponseRetrospectivaDto("Confronto direto entre os clubes",
-                clubeMandante.getNome(),
-                clubeVisitante.getNome(),
-                2L, 2L, 2L, 8L, 7L));
+                .thenReturn(new ClubeResponseRetrospectivaDto("Confronto direto entre os clubes",
+                        clubeMandante.getNome(),
+                        clubeVisitante.getNome(),
+                        2L, 2L, 2L, 8L, 7L));
 
         when(clubeService.buscaRetrospectivaClubesContraAdversario(2L, 1L))
                 .thenReturn(new ClubeResponseRetrospectivaDto("Confronto direto entre os clubes",
@@ -278,7 +296,7 @@ public class PartidaServiceTest {
         when(partidaRepository.findPartidaEntreClubes(1L, 2L))
                 .thenReturn(new ArrayList<>(Arrays.asList(partida1, partida2, partida3)));
 
-        PartidaResponseConfrontoDiretoDto  partidaResponseConfrontoDiretoDto = partidaService.buscaConfrontoEntreClubes(clubeMandante.getId(), clubeVisitante.getId());
+        PartidaResponseConfrontoDiretoDto partidaResponseConfrontoDiretoDto = partidaService.buscaConfrontoEntreClubes(clubeMandante.getId(), clubeVisitante.getId());
 
         assertEquals("Time1", partidaResponseConfrontoDiretoDto.clubeResponseRetrospectivaDto1().nome());
         assertEquals("Time2", partidaResponseConfrontoDiretoDto.clubeResponseRetrospectivaDto2().nome());
@@ -300,7 +318,7 @@ public class PartidaServiceTest {
         clubeModel.setEstado(estado);
         clubeModel.setDataCriacao(dataCriacao);
         clubeModel.setStatus(status);
-        return  clubeModel;
+        return clubeModel;
     }
 
     public PartidaModel montarPartidaModelParaTestes(Long id, ClubeModel clubeMandante, ClubeModel clubeVisitante, Long golsMandante, Long golsVisitante) {

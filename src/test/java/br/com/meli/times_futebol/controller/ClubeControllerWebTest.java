@@ -43,7 +43,7 @@ public class ClubeControllerWebTest {
 
 
     @Test
-    void TestDeveBuscarClubePorId() throws Exception {
+    void testDeveBuscarClubePorId() throws Exception {
 
         ClubeModel clube = montarClubeModelParaTestes(1L, "Clube 1", "SP", LocalDate.of(2025, 1, 1), true);
 
@@ -59,7 +59,7 @@ public class ClubeControllerWebTest {
     }
 
     @Test
-    void TestDeveCriarClube() throws Exception {
+    void testDeveCriarClube() throws Exception {
 
         ClubeRequestDto novoClube = new ClubeRequestDto("Clube 1", "RJ", LocalDate.of(2025, 1, 1), true);
         ClubeModel clubeSalvo = montarClubeModelParaTestes(2L, "Novo Clube", "SP", LocalDate.of(2025, 1, 1), true);
@@ -81,7 +81,7 @@ public class ClubeControllerWebTest {
 
 
     @Test
-    void TestDeveAtualizarClube() throws Exception {
+    void testDeveAtualizarClube() throws Exception {
         ClubeRequestDto novoClube = new ClubeRequestDto("Clube", "MG", LocalDate.of(2025, 1, 1), false);
 
         Long id = 2L;
@@ -96,7 +96,7 @@ public class ClubeControllerWebTest {
     }
 
     @Test
-    void TestDeveInativarClube() throws Exception {
+    void testDeveInativarClube() throws Exception {
         ClubeModel clubeAtualizado = montarClubeModelParaTestes(1L, "Clube Editado", "MG", LocalDate.of(2025, 1, 1), false);
 
         when(clubeService.inativaTime(1L)).thenReturn(clubeAtualizado);
@@ -129,7 +129,7 @@ public class ClubeControllerWebTest {
     }
 
     @Test
-    void deveRetornarMensagemQuandoNaoExistemClubes() throws Exception {
+    void testdeveRetornarMensagemQuandoNaoExistemClubes() throws Exception {
         Page<ClubeModel> emptyPage = new PageImpl<>(Collections.emptyList());
         when(clubeService.listarTodosTimes(any())).thenReturn(emptyPage);
 
@@ -143,7 +143,7 @@ public class ClubeControllerWebTest {
     }
 
     @Test
-    void deveRetornarRetrospectivaDeClube() throws Exception {
+    void testdeveRetornarRetrospectivaDeClube() throws Exception {
 
         ClubeResponseRetrospectivaDto dto = new ClubeResponseRetrospectivaDto("Teste", "Palmeiras", "Santos", 1L, 1L, 1L, 1L, 1L);
 

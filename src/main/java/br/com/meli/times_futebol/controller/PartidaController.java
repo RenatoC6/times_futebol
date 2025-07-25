@@ -48,9 +48,10 @@ public class PartidaController {
     public ResponseEntity<?> listarTodasPartidas(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "dataPartida,asc") String[] sort) {
+            @RequestParam(defaultValue = "dataPartida,asc") String[] sort,
+            @RequestParam(required = false) Long clubeId) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(partidaService.listarTodasPartidas(page, size, sort));
+        return ResponseEntity.status(HttpStatus.OK).body(partidaService.listarTodasPartidas(page, size, sort,clubeId));
     }
 
     @GetMapping("/confrontodireto")

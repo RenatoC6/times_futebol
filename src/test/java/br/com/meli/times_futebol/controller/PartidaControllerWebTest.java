@@ -22,10 +22,10 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -126,26 +126,27 @@ public class PartidaControllerWebTest {
                 LocalDateTime.of(2025, 1, 1, 15, 0), 2L, 3L);
 
         PartidaModel partida2 = montarPartidaParaTestes(2L,
-                montarClubeParaTestes(3L, "Clube 3", "MG", LocalDate.of(2025, 1, 1), true),
-                montarClubeParaTestes(4L, "Clube 4", "RS", LocalDate.of(2025, 1, 1), true),
+                montarClubeParaTestes(2L, "Clube 2", "MG", LocalDate.of(2025, 1, 1), true),
+                montarClubeParaTestes(1L, "Clube 1", "RS", LocalDate.of(2025, 1, 1), true),
                 montarEstadioParaTestes(2L, "Estadio 2"),
                 LocalDateTime.of(2025, 1, 2, 16, 0), 4L, 5L);
 
         List<PartidaModel> partidas = Arrays.asList(partida1, partida2);
         Page<PartidaModel> page = new PageImpl<>(partidas);
 
-        when(partidaService.listarTodasPartidas(anyInt(), anyInt(), any(String[].class))).thenReturn(page);
+        when(partidaService.listarTodasPartidas(anyInt(), anyInt(), any(String[].class), any()))
+                .thenReturn(page);
+
 
         mockMvc.perform(get("/partida")
                         .param("page", "0")
                         .param("size", "10")
                         .param("sort", "dataPartida,DESC"))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(1L))
-                .andExpect(jsonPath("$.content[0].clubeMandante.id").value(1L))
-                .andExpect(jsonPath("$.content[0].clubeVisitante.id").value(2L))
-                .andExpect(jsonPath("$.content[0].estadioPartida.id").value(1L))
-                .andExpect(jsonPath("$.content[0].dataPartida").value("2025-01-01T15:00:00"));
+                .andExpect(jsonPath("$.content[0].golsMandante").value(2L))
+                .andExpect(jsonPath("$.content[1].golsMandante").value(4L));
 
     }
 

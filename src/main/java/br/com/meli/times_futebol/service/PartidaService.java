@@ -13,12 +13,14 @@ import br.com.meli.times_futebol.model.PartidaModel;
 import br.com.meli.times_futebol.repository.ClubeRepository;
 import br.com.meli.times_futebol.repository.EstadioRepository;
 import br.com.meli.times_futebol.repository.PartidaRepository;
+import br.com.meli.times_futebol.specification.PartidaSpecification;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -61,7 +63,7 @@ public class PartidaService {
         return partidaModel;
     }
 
-    public PartidaModel atualizarPartida(PartidaRequestDto partidaRequestDto,Long idPartida) {
+    public PartidaModel atualizarPartida(PartidaRequestDto partidaRequestDto, Long idPartida) {
 
         PartidaModel partidaExistente = acharPartida(idPartida);
 
@@ -74,11 +76,11 @@ public class PartidaService {
         validaClubesIguais(partidaRequestDto);
         validaDataPatidaFutura(partidaRequestDto);
 
-       if(!partidaExistente.getId().equals(idPartida)) {
+        if (!partidaExistente.getId().equals(idPartida)) {
             validarDataPosteriorCriacaoClubesEConflitoHoras(partidaRequestDto, mandante, visitante);
             validaEstadioOcupadonaDataPartida(estadioPartida, partidaRequestDto);
             validarPartidaDuplicada(mandante, visitante, estadioPartida);
-       }
+        }
 
         BeanUtils.copyProperties(partidaRequestDto, partidaExistente);
         partidaExistente.setClubeMandante(mandante);
@@ -101,24 +103,26 @@ public class PartidaService {
         List<PartidaModel> listaPartidas = partidaRepository.findPartidaEntreClubes(clube1, clube2);
         if (!listaPartidas.isEmpty()) {
             mensagem = ("Confronto direto entre os clubes: " + clubeResponseRetrospectivaDto1.nome() + " X " + clubeResponseRetrospectivaDto2.nome());
+        } else {
+            mensagem = "Nenhuma partida encontrada entre os clubes: " + clubeResponseRetrospectivaDto1.nome() + " X " + clubeResponseRetrospectivaDto2.nome() + "/n";
         }
-        else {
-            mensagem = "Nenhuma partida encontrada entre os clubes: " + clubeResponseRetrospectivaDto1.nome() + " X " + clubeResponseRetrospectivaDto2.nome() + "/n";}
 
         return new PartidaResponseConfrontoDiretoDto(mensagem,
-                                                    listaPartidas,
-                                                    clubeResponseRetrospectivaDto1,
-                                                    clubeResponseRetrospectivaDto2);
+                listaPartidas,
+                clubeResponseRetrospectivaDto1,
+                clubeResponseRetrospectivaDto2);
     }
 
     public PartidaModel acharPartida(Long idValor) {
 
         return partidaRepository.findById(idValor)
-                .orElseThrow(() -> new EntidadeNaoEncontradaException("Partida: "+ idValor +  " nao encontrada"));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Partida: " + idValor + " nao encontrada"));
 
     }
 
-    public Page<PartidaModel> listarTodasPartidas(int page, int size, String[] sort) {
+    public Page<PartidaModel> listarTodasPartidas(int page, int size, String[] sort, Long clubeId){
+
+        buscarClube(clubeId, "para listar partidas por clube");
 
         // Criando objeto Sort
         Sort.Direction direction = sort[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
@@ -126,8 +130,18 @@ public class PartidaService {
 
         Pageable pageable = PageRequest.of(page, size, sortOrder);
 
-        return partidaRepository.findAll(pageable);
+        Specification<PartidaModel> specs = null;
+
+        if (clubeId != null) {
+            specs =  PartidaSpecification.porClube(clubeId);
+        }
+
+
+        return partidaRepository.findAll(specs, pageable);
+
+
     }
+
 
 // metdodos de validação
 
@@ -142,7 +156,7 @@ public class PartidaService {
     }
 
     // Verifica se os clubes estão ativos (0 (false) = ativo, 1 (true) = inativo)
-    public void validaClubeAtivo(ClubeModel mandante,ClubeModel visitante) {
+    public void validaClubeAtivo(ClubeModel mandante, ClubeModel visitante) {
         if (mandante.isAtivo() || visitante.isAtivo()) {
             throw new GenericExceptionConflict("Clube mandante ou visitante não está ativo");
         }

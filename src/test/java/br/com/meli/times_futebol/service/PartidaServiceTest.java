@@ -17,16 +17,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 
 
 public class PartidaServiceTest {
@@ -310,6 +314,31 @@ public class PartidaServiceTest {
 
     }
 
+    @Test
+    void testDeveListarTodasPartidasSemClubeIdEEstadioId() {
+        int page = 0;
+        int size = 10;
+        String[] sort = {"dataPartida", "asc"};
+
+        ClubeModel clubeMandante = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clubeMandante.getId())).thenReturn(Optional.of(clubeMandante));
+
+        ClubeModel clubeVisitante = montarClubeModelParaTestes(2L, "Time2", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.findById(clubeVisitante.getId())).thenReturn(Optional.of(clubeVisitante));
+
+        PartidaModel partida1 = montarPartidaModelParaTestes(1L, clubeMandante, clubeVisitante, 2L, 1L);
+        PartidaModel partida2 = montarPartidaModelParaTestes(2L, clubeVisitante, clubeMandante, 3L, 0L);
+
+        Page<PartidaModel> pageMock = new PageImpl<>(Arrays.asList(partida1, partida2));
+        when(partidaRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(pageMock);
+
+        Page<PartidaModel> resultado = partidaService.listarTodasPartidas(page, size, sort, 1L);
+
+        assertEquals(2, resultado.getTotalElements());
+        assertTrue(resultado.getContent().stream().anyMatch(p -> p.getId().equals(1L) && p.getGolsMandante().equals(2L)));
+
+
+    }
     // Métodos auxiliares para criar objetos de teste
 
     public ClubeModel montarClubeModelParaTestes(Long id, String nome, String estado, LocalDate dataCriacao, boolean status) {

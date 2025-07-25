@@ -10,10 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -22,12 +22,9 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 
 @WebMvcTest(ClubeController.class)
 public class ClubeControllerWebTest {
@@ -76,8 +73,6 @@ public class ClubeControllerWebTest {
                 .andExpect(jsonPath("$.dataCriacao").value("2025-01-01"))
                 .andExpect(jsonPath("$.status").value(true));
     }
-
-
 
 
     @Test
@@ -134,11 +129,11 @@ public class ClubeControllerWebTest {
         when(clubeService.listarTodosTimes(any())).thenReturn(emptyPage);
 
         mockMvc.perform(get("/clube")
-                        .param("page", "0")
-                        .param("size", "10")
-                        .param("sort", "nome,asc")
-                        .contentType(MediaType.APPLICATION_JSON)
-                ).andExpect(status().isOk());
+                .param("page", "0")
+                .param("size", "10")
+                .param("sort", "nome,asc")
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
 
     }
 
@@ -167,6 +162,6 @@ public class ClubeControllerWebTest {
         clubeModel.setDataCriacao(dataCriacao);
         clubeModel.setStatus(status);
 
-        return  clubeModel;
+        return clubeModel;
     }
 }

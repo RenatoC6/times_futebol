@@ -17,7 +17,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class EstadioServiceTest {
 
@@ -38,7 +39,7 @@ public class EstadioServiceTest {
         EstadioRequestDto dto = new EstadioRequestDto("EstadioTeste");
         when(estadioRepository.existsByNomeEstadioIgnoreCase(any())).thenReturn(false);
 
-        EstadioModel estadioRetornado =  estadioService.criarEstadio(dto);
+        EstadioModel estadioRetornado = estadioService.criarEstadio(dto);
 
         assertEquals("EstadioTeste", estadioRetornado.getNomeEstadio());
         verify(estadioRepository).save(any());
@@ -62,6 +63,7 @@ public class EstadioServiceTest {
         verify(estadioRepository).save(any());
 
     }
+
     @Test
     public void testeQuandoListarEstadios() {
 
@@ -97,7 +99,7 @@ public class EstadioServiceTest {
         when(estadioRepository.findById(idInexistente)).thenReturn(java.util.Optional.empty());
 
         Exception ex = assertThrows(EntidadeNaoEncontradaException.class,
-                    () -> estadioService.acharEstadio(idInexistente));
+                () -> estadioService.acharEstadio(idInexistente));
 
         assertTrue(ex.getMessage().contains(" nao encontrado"));
         verify(estadioRepository).findById(idInexistente);

@@ -1,6 +1,8 @@
 package br.com.meli.times_futebol.controller;
 
+import br.com.meli.times_futebol.dto.ClubeResponseRetrospectivaDto;
 import br.com.meli.times_futebol.dto.PartidaRequestDto;
+import br.com.meli.times_futebol.dto.PartidaResponseConfrontoDiretoDto;
 import br.com.meli.times_futebol.model.ClubeModel;
 import br.com.meli.times_futebol.model.EstadioModel;
 import br.com.meli.times_futebol.model.PartidaModel;
@@ -11,9 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,11 +25,9 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 @WebMvcTest(PartidaController.class)
 public class PartidaControllerWebTest {
@@ -36,7 +36,7 @@ public class PartidaControllerWebTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private PartidaService  partidaService;
+    private PartidaService partidaService;
 
     @Autowired
     private ObjectMapper objectMapper; // Para serializar/deserializar JSON
@@ -48,7 +48,7 @@ public class PartidaControllerWebTest {
                 montarClubeParaTestes(1L, "Clube 1", "SP", LocalDate.of(2025, 1, 1), true),
                 montarClubeParaTestes(2L, "Clube 2", "RJ", LocalDate.of(2025, 1, 1), true),
                 montarEstadioParaTestes(1L, "Estadio 1"),
-                LocalDateTime.of(2025, 1, 1, 15, 0) ,2L,3L);
+                LocalDateTime.of(2025, 1, 1, 15, 0), 2L, 3L);
 
         when(partidaService.acharPartida(1L)).thenReturn(partida);
 
@@ -66,14 +66,14 @@ public class PartidaControllerWebTest {
     @Test
     void testDeveCriarPartida() throws Exception {
 
-        PartidaRequestDto novaPartida = new PartidaRequestDto(1L,2L,1L,2L,1L,         // ID do estádio
+        PartidaRequestDto novaPartida = new PartidaRequestDto(1L, 2L, 1L, 2L, 1L,         // ID do estádio
                 LocalDateTime.of(2025, 1, 1, 15, 0));
 
         PartidaModel partidaSalva = montarPartidaParaTestes(2L,
                 montarClubeParaTestes(1L, "Clube 1", "SP", LocalDate.of(2025, 1, 1), true),
                 montarClubeParaTestes(2L, "Clube 2", "RJ", LocalDate.of(2025, 1, 1), true),
                 montarEstadioParaTestes(1L, "Estadio 1"),
-                LocalDateTime.of(2025, 1, 1, 15, 0) ,2L,3L);
+                LocalDateTime.of(2025, 1, 1, 15, 0), 2L, 3L);
 
         when(partidaService.criarPartida(novaPartida)).thenReturn(partidaSalva);
 
@@ -100,7 +100,7 @@ public class PartidaControllerWebTest {
                 montarEstadioParaTestes(1L, "Estadio 1"),
                 LocalDateTime.of(2025, 1, 1, 16, 0), 3L, 4L);
 
-        when(partidaService.atualizarPartida(partidaAtualizada,1L)).thenReturn(partidaModel);
+        when(partidaService.atualizarPartida(partidaAtualizada, 1L)).thenReturn(partidaModel);
 
         mockMvc.perform(put("/partida/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -123,13 +123,13 @@ public class PartidaControllerWebTest {
                 montarClubeParaTestes(1L, "Clube 1", "SP", LocalDate.of(2025, 1, 1), true),
                 montarClubeParaTestes(2L, "Clube 2", "RJ", LocalDate.of(2025, 1, 1), true),
                 montarEstadioParaTestes(1L, "Estadio 1"),
-                LocalDateTime.of(2025, 1, 1, 15, 0) ,2L,3L);
+                LocalDateTime.of(2025, 1, 1, 15, 0), 2L, 3L);
 
         PartidaModel partida2 = montarPartidaParaTestes(2L,
                 montarClubeParaTestes(3L, "Clube 3", "MG", LocalDate.of(2025, 1, 1), true),
                 montarClubeParaTestes(4L, "Clube 4", "RS", LocalDate.of(2025, 1, 1), true),
                 montarEstadioParaTestes(2L, "Estadio 2"),
-                LocalDateTime.of(2025, 1, 2, 16, 0) ,4L,5L);
+                LocalDateTime.of(2025, 1, 2, 16, 0), 4L, 5L);
 
         List<PartidaModel> partidas = Arrays.asList(partida1, partida2);
         Page<PartidaModel> page = new PageImpl<>(partidas);
@@ -147,17 +147,37 @@ public class PartidaControllerWebTest {
                 .andExpect(jsonPath("$.content[0].estadioPartida.id").value(1L))
                 .andExpect(jsonPath("$.content[0].dataPartida").value("2025-01-01T15:00:00"));
 
+    }
+
+    @Test
+    void testDeveListarConfrontoDiretoEntreClubes() throws Exception {
+
+        ClubeModel clube1 = montarClubeParaTestes(1L, "Clube 1", "SP", LocalDate.of(2025, 1, 1), true);
+        ClubeModel clube2 = montarClubeParaTestes(2L, "Clube 2", "RJ", LocalDate.of(2025, 1, 1), true);
+        EstadioModel estadio1 = montarEstadioParaTestes(1L, "Estadio 1");
+
+        PartidaModel partida1 = montarPartidaParaTestes(1L, clube1, clube2, estadio1, LocalDateTime.of(2025, 1, 1, 15, 0), 1L, 1L);
+        PartidaModel partida2 = montarPartidaParaTestes(2L, clube2, clube1, estadio1, LocalDateTime.of(2025, 1, 2, 16, 0), 1L, 1L);
+
+        PartidaResponseConfrontoDiretoDto dto = new PartidaResponseConfrontoDiretoDto("Confronto direto entre Clube 1 e Clube 2",
+                Arrays.asList(partida1, partida2),
+                new ClubeResponseRetrospectivaDto("", clube1.getNome(), clube2.getNome(), 0L, 1L, 0L, 2L, 2L),
+                new ClubeResponseRetrospectivaDto("", clube1.getNome(), clube2.getNome(), 0L, 1L, 0L, 2L, 2L));
+
+
+        when(partidaService.buscaConfrontoEntreClubes(1L, 2L)).thenReturn(dto);
+
+        mockMvc.perform(get("/partida/confrontodireto")
+                        .param("clube1", "1")
+                        .param("clube2", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mensagem").value("Confronto direto entre " + clube1.getNome() + " e " + clube2.getNome()));
+
 
     }
 
 
-
-
-
-
-
-
-        public PartidaModel montarPartidaParaTestes(Long id, ClubeModel mandante, ClubeModel visitante, EstadioModel estadio, LocalDateTime dataPartida, Long golsMandante, Long golsVisitante) {
+    public PartidaModel montarPartidaParaTestes(Long id, ClubeModel mandante, ClubeModel visitante, EstadioModel estadio, LocalDateTime dataPartida, Long golsMandante, Long golsVisitante) {
 
         PartidaModel partidaModel = new PartidaModel();
         partidaModel.setId(id);
@@ -168,7 +188,7 @@ public class PartidaControllerWebTest {
         partidaModel.setGolsMandante(golsMandante);
         partidaModel.setGolsVisitante(golsVisitante);
 
-        return  partidaModel;
+        return partidaModel;
     }
 
     public ClubeModel montarClubeParaTestes(Long id, String nome, String estado, LocalDate dataCriacao, boolean status) {
@@ -180,7 +200,7 @@ public class PartidaControllerWebTest {
         clubeModel.setDataCriacao(dataCriacao);
         clubeModel.setStatus(status);
 
-        return  clubeModel;
+        return clubeModel;
     }
 
     public EstadioModel montarEstadioParaTestes(Long id, String nome) {
@@ -189,7 +209,7 @@ public class PartidaControllerWebTest {
         estadioModel.setId(id);
         estadioModel.setNomeEstadio(nome);
 
-        return  estadioModel;
+        return estadioModel;
     }
 
 }

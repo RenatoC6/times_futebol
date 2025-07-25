@@ -24,7 +24,8 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ClubeServiceTest {
 
@@ -36,6 +37,8 @@ public class ClubeServiceTest {
 
     @Mock
     private ClubeModel clubeModel;
+
+    @Mock
     private PartidaModel partidaModel;
 
     @InjectMocks
@@ -47,24 +50,24 @@ public class ClubeServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-   @Test
-    public void testeDeveCriarClubeComDadosValidos(){
-    // Arrange
-       ClubeRequestDto clubeRequestDto = new ClubeRequestDto("teste", "SP", LocalDate.of(2025,1,1), false);
-       when(clubeRepository.existsByNomeIgnoreCase(any())).thenReturn(false);
-    // Act
-       ClubeModel cluberetornado = clubeService.criarTime(clubeRequestDto);
-    // Assertion
-       assertEquals("teste", cluberetornado.getNome());
-       assertEquals("SP", cluberetornado.getEstado());
-       assertEquals(LocalDate.of(2025, 1, 1), cluberetornado.getDataCriacao());
-       verify(clubeRepository).save(any());
+    @Test
+    public void testeDeveCriarClubeComDadosValidos() {
+        // Arrange
+        ClubeRequestDto clubeRequestDto = new ClubeRequestDto("teste", "SP", LocalDate.of(2025, 1, 1), false);
+        when(clubeRepository.existsByNomeIgnoreCase(any())).thenReturn(false);
+        // Act
+        ClubeModel cluberetornado = clubeService.criarTime(clubeRequestDto);
+        // Assertion
+        assertEquals("teste", cluberetornado.getNome());
+        assertEquals("SP", cluberetornado.getEstado());
+        assertEquals(LocalDate.of(2025, 1, 1), cluberetornado.getDataCriacao());
+        verify(clubeRepository).save(any());
     }
 
     @Test
-    public void testeDeveAtualizarClubeComDadosValidos(){
+    public void testeDeveAtualizarClubeComDadosValidos() {
 
-        ClubeRequestDto clubeRequestDto = new ClubeRequestDto("teste", "SP", LocalDate.of(2025,1,1), false);
+        ClubeRequestDto clubeRequestDto = new ClubeRequestDto("teste", "SP", LocalDate.of(2025, 1, 1), false);
         when(clubeRepository.existsByNomeIgnoreCase(any())).thenReturn(false);
 
         ClubeModel clubeModel = montarClubeModelParaTestes(1L, "teste", "SP", LocalDate.of(2025, 1, 1), false);
@@ -92,8 +95,9 @@ public class ClubeServiceTest {
         verify(clubeRepository).findById(clubeRetornado.getId());
 
     }
+
     @Test
-    public void testeDeveInativarClube(){
+    public void testeDeveInativarClube() {
 
         ClubeModel clubeEsperado = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), true);
         when(clubeRepository.findById(clubeEsperado.getId())).thenReturn(Optional.of(clubeEsperado));
@@ -145,7 +149,7 @@ public class ClubeServiceTest {
 
     @Test
     void testeLancarExceptionQuandoDataCriacaoNoFuturo() {
-        ClubeRequestDto clubeRequestDto = new ClubeRequestDto("teste", "SP", LocalDate.of(2025,12,1), true);
+        ClubeRequestDto clubeRequestDto = new ClubeRequestDto("teste", "SP", LocalDate.of(2025, 12, 1), true);
         Exception ex = assertThrows(GenericException.class,
                 () -> clubeService.validaDataCriacao(clubeRequestDto));
         assertTrue(ex.getMessage().contains("data de criacao"));
@@ -167,13 +171,14 @@ public class ClubeServiceTest {
                 () -> clubeService.validaNomeExistente(clubeRequestDto));
         assertTrue(ex.getMessage().contains(" ja cadastrado"));
     }
+
     @Test
-   void testeDeveRetornarMensagemQuandoListaPartidasVaziaNaBuscaRestropectiva() {
+    void testeDeveRetornarMensagemQuandoListaPartidasVaziaNaBuscaRestropectiva() {
 
         ClubeModel clube = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
 
         when(clubeRepository.findById(clube.getId())).thenReturn(Optional.of(clube));
-        when(partidaRepository.findByClubeMandanteOrClubeVisitante(clube,clube)).thenReturn(Collections.emptyList());
+        when(partidaRepository.findByClubeMandanteOrClubeVisitante(clube, clube)).thenReturn(Collections.emptyList());
 
         ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClube(clube.getId());
 
@@ -184,6 +189,7 @@ public class ClubeServiceTest {
         assertEquals(0L, clubeResponseRetrospectivaDto.golsMarcados());
         assertEquals(0L, clubeResponseRetrospectivaDto.golsSofridos());
     }
+
     @Test
     void testeDeveRetornarRetrospectivaClubeMandanteComDadosValidos() {
 
@@ -246,11 +252,11 @@ public class ClubeServiceTest {
         ClubeModel clubeVisitante = montarClubeModelParaTestes(2L, "Time2", "SP", LocalDate.of(2025, 1, 1), false);
         when(clubeRepository.findById(clubeVisitante.getId())).thenReturn(Optional.of(clubeVisitante));
 
-        when(partidaRepository.findByClubeMandanteOrClubeVisitante(clubeMandante,clubeVisitante)).thenReturn(Collections.emptyList());
+        when(partidaRepository.findByClubeMandanteOrClubeVisitante(clubeMandante, clubeVisitante)).thenReturn(Collections.emptyList());
 
         ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClubesContraAdversario(clubeMandante.getId(), clubeVisitante.getId());
 
-        assertEquals( "Nenhuma partida entre o clube " + clubeMandante.getNome() + " contra o clube: " + clubeVisitante.getNome(), clubeResponseRetrospectivaDto.mensagem());
+        assertEquals("Nenhuma partida entre o clube " + clubeMandante.getNome() + " contra o clube: " + clubeVisitante.getNome(), clubeResponseRetrospectivaDto.mensagem());
         assertEquals(0L, clubeResponseRetrospectivaDto.vitorias());
         assertEquals(0L, clubeResponseRetrospectivaDto.empates());
         assertEquals(0L, clubeResponseRetrospectivaDto.derrotas());
@@ -280,7 +286,7 @@ public class ClubeServiceTest {
         when(partidaRepository.findByClubeMandanteAndClubeVisitante(clubeVisitante, clubeMandante))
                 .thenReturn(new ArrayList<>(Arrays.asList(partida3, partida4, partida5)));
 
-        ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClubesContraAdversario(clubeMandante.getId(),clubeVisitante.getId());
+        ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClubesContraAdversario(clubeMandante.getId(), clubeVisitante.getId());
 
         assertEquals("Time1", clubeResponseRetrospectivaDto.nome());
         assertEquals("Time2", clubeResponseRetrospectivaDto.nomeAdversario());
@@ -302,7 +308,7 @@ public class ClubeServiceTest {
         when(clubeRepository.findById(clubeVisitante.getId())).thenReturn(Optional.of(clubeVisitante));
 
         Exception ex = assertThrows(GenericExceptionConflict.class,
-                () -> clubeService.buscaRetrospectivaClubesContraAdversario(clubeMandante.getId(),clubeVisitante.getId()));
+                () -> clubeService.buscaRetrospectivaClubesContraAdversario(clubeMandante.getId(), clubeVisitante.getId()));
         assertTrue(ex.getMessage().contains("Os clubes nao podem ser iguais"));
     }
 
@@ -316,13 +322,13 @@ public class ClubeServiceTest {
         when(clubeRepository.findById(clubeVisitante.getId())).thenReturn(Optional.of(clubeVisitante));
 
         Exception ex = assertThrows(GenericExceptionConflict.class,
-                () -> clubeService.buscaRetrospectivaClubesContraAdversario(clubeMandante.getId(),clubeVisitante.getId()));
+                () -> clubeService.buscaRetrospectivaClubesContraAdversario(clubeMandante.getId(), clubeVisitante.getId()));
         assertTrue(ex.getMessage().contains("Um dos clubes esta inativo"));
     }
 
 
     @Test
-    void testeDeveRetornarRankingDeClubes(){
+    void testeDeveRetornarRankingDeClubes() {
 
         ClubeModel clube1 = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
         when(clubeRepository.findById(clube1.getId())).thenReturn(Optional.of(clube1));
@@ -361,7 +367,7 @@ public class ClubeServiceTest {
         clubeModel.setDataCriacao(dataCriacao);
         clubeModel.setStatus(status);
 
-        return  clubeModel;
+        return clubeModel;
     }
 
     public PartidaModel montarPartidaModelParaTestes(Long id, ClubeModel clubeMandante, ClubeModel clubeVisitante, Long golsMandante, Long golsVisitante) {

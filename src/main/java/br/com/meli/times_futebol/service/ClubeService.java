@@ -92,7 +92,7 @@ public class ClubeService {
 
     public ClubeResponseRetrospectivaDto buscaRetrospectivaClube(Long idValor) {
 
-        String mensagem = "";
+        String mensagem ;
         Long vitorias = 0L;
         Long empates = 0L;
         Long derrotas = 0L;

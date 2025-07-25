@@ -126,6 +126,15 @@ public class PartidaService {
 
         // Criando objeto Sort
         Sort.Direction direction = sort[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+//        O codigo acima eh um operador ternário que substitui o código abaixo:
+//        Sort.Direction direction;
+//        if (sort[1].equalsIgnoreCase("desc")) {
+//            direction = Sort.Direction.DESC;
+//        } else {
+//            direction = Sort.Direction.ASC;
+//        }
+
+
         Sort sortOrder = Sort.by(direction, sort[0]);
 
         Pageable pageable = PageRequest.of(page, size, sortOrder);

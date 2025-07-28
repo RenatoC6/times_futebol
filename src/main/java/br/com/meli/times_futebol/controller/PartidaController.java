@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Parameter;
 
 
 @RestController
@@ -44,14 +45,17 @@ public class PartidaController {
         return ResponseEntity.status(HttpStatus.OK).body(partida);
     }
 
-    @GetMapping
+    @GetMapping("/listarPartidas")
     public ResponseEntity<?> listarTodasPartidas(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "dataPartida,asc") String[] sort,
-            @RequestParam(required = false) Long clubeId) {
+            @RequestParam(required = false) Long clubeId,
+            @Parameter(description = "goleadas S/N ?")
+            @RequestParam(required = false, defaultValue = "N") String goleadas) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(partidaService.listarTodasPartidas(page, size, sort,clubeId));
+
+        return ResponseEntity.status(HttpStatus.OK).body(partidaService.listarTodasPartidas(page, size, sort,clubeId,goleadas));
     }
 
     @GetMapping("/confrontodireto")

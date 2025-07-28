@@ -332,7 +332,7 @@ public class PartidaServiceTest {
         Page<PartidaModel> pageMock = new PageImpl<>(Arrays.asList(partida1, partida2));
         when(partidaRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(pageMock);
 
-        Page<PartidaModel> resultado = partidaService.listarTodasPartidas(page, size, sort, 1L);
+        Page<PartidaModel> resultado = partidaService.listarTodasPartidas(page, size, sort, 1L, "S");
 
         assertEquals(2, resultado.getTotalElements());
         assertTrue(resultado.getContent().stream().anyMatch(p -> p.getId().equals(1L) && p.getGolsMandante().equals(2L)));

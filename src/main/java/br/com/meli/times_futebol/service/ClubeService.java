@@ -11,10 +11,14 @@ import br.com.meli.times_futebol.model.ClubeModel;
 import br.com.meli.times_futebol.model.PartidaModel;
 import br.com.meli.times_futebol.repository.ClubeRepository;
 import br.com.meli.times_futebol.repository.PartidaRepository;
+import br.com.meli.times_futebol.specification.ClubeSpecification;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -46,11 +50,29 @@ public class ClubeService {
     }
 
 
-    public Page<ClubeModel> listarTodosTimes(Pageable pageable) {
+    public Page<ClubeModel> listarTodosTimes(int page, int size, String[] sort, String nome, String estado, boolean status) {
 
-        return clubeRepository.findAll(pageable);
+        Sort.Direction direction = sort[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+        Sort sortOrder = Sort.by(direction, sort[0]);
+
+        Pageable pageable = PageRequest.of(page, size, sortOrder);
+
+        Specification<ClubeModel> specs = null;
+
+        if (nome != null) {
+            specs = ClubeSpecification.porNome(nome);
+        } else if (estado != null) {
+            specs = ClubeSpecification.porEstado(estado);
+        } else if (!status) {
+            specs = ClubeSpecification.porStatus(status);
+        }
+
+
+        return clubeRepository.findAll(specs,pageable);
 
     }
+
 
     public ClubeModel acharTime(Long idValor) {
 

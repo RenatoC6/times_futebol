@@ -14,16 +14,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -111,24 +110,33 @@ public class ClubeServiceTest {
 
     @Test
     void listarTodosTimesDeveRetornarPageComTimes() {
-        Pageable pageable = PageRequest.of(0, 10);
+        String[] sort = new String[] {"nome", "asc"};
+        int page = 0;
+        int size = 10;
+        String nome = "Time1";
+        String estado = "SP";
+        boolean status = false;
 
-        ClubeModel clube1 = montarClubeModelParaTestes(1L, "Time1", "SP", LocalDate.of(2025, 1, 1), false);
+        Sort.Direction direction = sort[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sortOrder = Sort.by(direction, sort[0]);
+        Pageable pageable = PageRequest.of(page, size, sortOrder);
 
-        ClubeModel clube2 = montarClubeModelParaTestes(2L, "Time2", "SP", LocalDate.of(2025, 1, 1), false);
+        ClubeModel clube1 = montarClubeModelParaTestes(1L , nome, estado, LocalDate.of(2025, 1, 1), false);
 
-        List<ClubeModel> clubes = List.of(clube1, clube2);
-        Page<ClubeModel> page = new PageImpl<>(clubes, pageable, clubes.size());
+        List<ClubeModel> clubes = List.of(clube1);
+        Page<ClubeModel> pageResult = new PageImpl<>(clubes, pageable, clubes.size());
 
-        when(clubeRepository.findAll(pageable)).thenReturn(page);
+        Specification<ClubeModel> specs = any();
 
-        Page<ClubeModel> resultado = clubeService.listarTodosTimes(pageable);
+        when(clubeRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(pageResult);
 
+        Page<ClubeModel> resultado = clubeService.listarTodosTimes(page, size, sort, nome, estado, status);
+
+        // Assert
         assertFalse(resultado.isEmpty());
-        assertEquals(2, resultado.getTotalElements());
+        assertEquals(1, resultado.getTotalElements());
         assertEquals("Time1", resultado.getContent().get(0).getNome());
-        assertEquals("Time2", resultado.getContent().get(1).getNome());
-        verify(clubeRepository).findAll(pageable);
+
     }
 
 

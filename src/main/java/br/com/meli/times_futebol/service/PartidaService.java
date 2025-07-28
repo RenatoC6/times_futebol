@@ -120,9 +120,12 @@ public class PartidaService {
 
     }
 
-    public Page<PartidaModel> listarTodasPartidas(int page, int size, String[] sort, Long clubeId){
+    public Page<PartidaModel> listarTodasPartidas(int page, int size, String[] sort, Long clubeId, String goleadas) {
 
-        buscarClube(clubeId, "para listar partidas por clube");
+        if(clubeId != null) {
+            buscarClube(clubeId, "para listar partidas por clube");
+        } else if ("S".equalsIgnoreCase(goleadas))
+            throw new GenericException("Quando 'goleadas' for 'S', o parâmetro 'clubeId' é obrigatório.");
 
         // Criando objeto Sort
         Sort.Direction direction = sort[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
@@ -134,17 +137,17 @@ public class PartidaService {
 //            direction = Sort.Direction.ASC;
 //        }
 
-
         Sort sortOrder = Sort.by(direction, sort[0]);
 
         Pageable pageable = PageRequest.of(page, size, sortOrder);
 
         Specification<PartidaModel> specs = null;
 
-        if (clubeId != null) {
+        if (clubeId != null && "S".equalsIgnoreCase(goleadas)) {
+            specs = PartidaSpecification.porClubeEGoleadas(clubeId);
+        } else if (clubeId != null) {
             specs =  PartidaSpecification.porClube(clubeId);
         }
-
 
         return partidaRepository.findAll(specs, pageable);
 

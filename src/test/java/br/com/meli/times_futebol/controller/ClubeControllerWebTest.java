@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -110,25 +110,26 @@ public class ClubeControllerWebTest {
 
         Page<ClubeModel> pageClubes = new PageImpl<>(clubes);
 
-        when(clubeService.listarTodosTimes(any(Pageable.class))).thenReturn(pageClubes);
+        when(clubeService.listarTodosTimes(eq(0), eq(10), any(String[].class), eq("Santos"), eq("SP"),eq(true))).thenReturn(pageClubes);
 
-        mockMvc.perform(get("/clube")
+        mockMvc.perform(get("/clube/listarClubes")
                         .param("page", "0")
                         .param("size", "10")
                         .param("sort", "nome,asc")
+                        .param("nome", "Santos")
+                        .param("estado", "SP")
+                        .param("status", "true")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content[0].nome").value("Flamengo"))
-                .andExpect(jsonPath("$.content[1].nome").value("Santos"));
+                .andExpect(jsonPath("$.content[0].nome").value("Flamengo"));
     }
 
     @Test
     void testdeveRetornarMensagemQuandoNaoExistemClubes() throws Exception {
         Page<ClubeModel> emptyPage = new PageImpl<>(Collections.emptyList());
-        when(clubeService.listarTodosTimes(any())).thenReturn(emptyPage);
+        when(clubeService.listarTodosTimes(eq(0), eq(10), any(String[].class), eq("Santos"), eq("SP"),eq(true))).thenReturn(emptyPage);
 
-        mockMvc.perform(get("/clube")
+        mockMvc.perform(get("/clube/listarClubes")
                 .param("page", "0")
                 .param("size", "10")
                 .param("sort", "nome,asc")

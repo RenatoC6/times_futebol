@@ -134,14 +134,16 @@ public class PartidaControllerWebTest {
         List<PartidaModel> partidas = Arrays.asList(partida1, partida2);
         Page<PartidaModel> page = new PageImpl<>(partidas);
 
-        when(partidaService.listarTodasPartidas(anyInt(), anyInt(), any(String[].class), any()))
+        when(partidaService.listarTodasPartidas(eq(0), eq(10), any(String[].class), eq(1L), eq("S")))
                 .thenReturn(page);
 
 
-        mockMvc.perform(get("/partida")
+        mockMvc.perform(get("/partida/listarPartidas")
                         .param("page", "0")
                         .param("size", "10")
-                        .param("sort", "dataPartida,DESC"))
+                        .param("sort", "dataPartida,DESC")
+                        .param("clubeId", "1")
+                        .param("goleadas", "S"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(1L))

@@ -1,7 +1,8 @@
 package br.com.meli.times_futebol.controller;
 
-import br.com.meli.times_futebol.exception.GenericException;
 import br.com.meli.times_futebol.dto.EstadioRequestDto;
+import br.com.meli.times_futebol.dto.EstadioResponseDto;
+import br.com.meli.times_futebol.exception.GenericException;
 import br.com.meli.times_futebol.model.EstadioModel;
 import br.com.meli.times_futebol.service.EstadioService;
 import jakarta.validation.Valid;
@@ -19,14 +20,28 @@ import org.springframework.web.bind.annotation.*;
 public class EstadioController {
 
     @Autowired // instancia (new) automaticamete a classe ClubeService -
-    private EstadioService  estadioService;
+    private EstadioService estadioService;
 
     @PostMapping
-    public ResponseEntity<EstadioModel> cadastrarEstadio(@RequestBody @Valid EstadioRequestDto estadioRequestDto) {
+    public ResponseEntity<?> cadastrarEstadio(@RequestBody @Valid EstadioRequestDto estadioRequestDto) {
 
-        EstadioModel estadioModel = estadioService.criarEstadio(estadioRequestDto);
+        EstadioResponseDto estadioResponseDto = estadioService.criarEstadio(estadioRequestDto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(estadioModel);
+        return ResponseEntity.status(HttpStatus.CREATED).body(estadioResponseDto);
+    }
+
+    @PutMapping("/{idEstadio}")
+    public ResponseEntity<?> atualizarEstadio(@PathVariable Long idEstadio,
+                                              @RequestBody @Valid EstadioRequestDto estadioRequestDto) {
+
+        EstadioModel estadioModel = estadioService.acharEstadio(idEstadio);
+
+        estadioModel.setNomeEstadio(estadioRequestDto.nomeEstadio());
+
+        EstadioResponseDto estadioResponseDto = estadioService.atualizarEstadio(estadioModel, estadioRequestDto);
+
+        return ResponseEntity.status(HttpStatus.OK).body(estadioResponseDto);
+
     }
 
     @GetMapping
@@ -50,11 +65,12 @@ public class EstadioController {
         // Ordenação: sortOrder (definido acima)
         Pageable pageable = PageRequest.of(page, size, sortOrder);
 
-        Page<EstadioModel> estadiosPage= estadioService.listarTodosEstadios(pageable);
+        Page<EstadioModel> estadiosPage = estadioService.listarTodosEstadios(pageable);
 
-        if(estadiosPage.isEmpty()){
+        if (estadiosPage.isEmpty()) {
             return ResponseEntity.status(HttpStatus.OK).
-                    body(new GenericException("Nenhum estadio encontrado"));}
+                    body(new GenericException("Nenhum estadio encontrado"));
+        }
 
         return ResponseEntity.status(HttpStatus.OK).body(estadiosPage);
     }
@@ -67,26 +83,15 @@ public class EstadioController {
         return ResponseEntity.status(HttpStatus.OK).body(estadioModel);
     }
 
-    @PutMapping ("/{idEstadio}")
-    public ResponseEntity<?> atualizarEstadio(@PathVariable Long idEstadio,
-                                                   @RequestBody @Valid EstadioRequestDto estadioRequestDto) {
 
-        EstadioModel estadioModel = estadioService.acharEstadio(idEstadio);
-
-        EstadioModel estadioModelAtlz = estadioService.atualizarEstadio(estadioModel, estadioRequestDto);
-
-        return ResponseEntity.status(HttpStatus.OK).body(estadioModelAtlz);
-
-    }
-
-    @DeleteMapping ("/{idEstadio}")
+    @DeleteMapping("/{idEstadio}")
     public ResponseEntity<?> deleteEstadio(@PathVariable Long idEstadio) {
 
         EstadioModel estadioModel = estadioService.acharEstadio(idEstadio);
 
         estadioService.deleteEstadio(idEstadio);
 
-        return ResponseEntity.status(HttpStatus.OK).body("estadio excluido com sucesso: " + ": "+ estadioModel.getNomeEstadio());
+        return ResponseEntity.status(HttpStatus.OK).body("estadio excluido com sucesso: " + ": " + estadioModel.getNomeEstadio());
 
     }
 }

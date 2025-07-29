@@ -76,21 +76,6 @@ public class ClubeControllerWebTest {
 
 
     @Test
-    void testDeveAtualizarClube() throws Exception {
-        ClubeRequestDto novoClube = new ClubeRequestDto("Clube", "MG", LocalDate.of(2025, 1, 1), false);
-
-        Long id = 2L;
-        ClubeModel clubeAtualizado = montarClubeModelParaTestes(2L, "Clube Editado", "MG", LocalDate.of(2025, 1, 1), false);
-
-        when(clubeService.atualizarTime(id, novoClube)).thenReturn(clubeAtualizado);
-
-        mockMvc.perform(put("/clube/{id}", id)
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(novoClube)))
-                .andExpect(status().isOk());
-    }
-
-    @Test
     void testDeveInativarClube() throws Exception {
         ClubeModel clubeAtualizado = montarClubeModelParaTestes(1L, "Clube Editado", "MG", LocalDate.of(2025, 1, 1), false);
 

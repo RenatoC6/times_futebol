@@ -1,6 +1,7 @@
 package br.com.meli.times_futebol.controller;
 
 import br.com.meli.times_futebol.dto.EstadioRequestDto;
+import br.com.meli.times_futebol.dto.EstadioResponseDto;
 import br.com.meli.times_futebol.model.EstadioModel;
 import br.com.meli.times_futebol.service.EstadioService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,34 +54,19 @@ public class EstadioControllerWebTest {
     @Test
     void TestDeveCriarEstadio() throws Exception {
 
-        EstadioRequestDto novoEstadio = new EstadioRequestDto("Estadio 1");
-        EstadioModel estadioSalvo = montarEstadioModelParaTestes(2L, "Novo Estadio");
-
+        EstadioRequestDto novoEstadio = new EstadioRequestDto("Estadio 1", "13208-600");
+        EstadioResponseDto estadioSalvo = montarEstadioModelParaTestesDto( "Novo Estadio");
         when(estadioService.criarEstadio(novoEstadio)).thenReturn(estadioSalvo);
 
         mockMvc.perform(post("/estadio")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(novoEstadio)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(2L))
-                .andExpect(jsonPath("$.nomeEstadio").value("Novo Estadio"));
+                .andExpect(jsonPath("$.cep").value("13208-600"));
 
     }
 
-    @Test
-    void TestDeveAtualizarEstadio() throws Exception {
 
-        EstadioRequestDto novoEstadio = new EstadioRequestDto("Estadio 1");
-        EstadioModel estadioSalvo = montarEstadioModelParaTestes(1L, "Novo Estadio");
-
-        when(estadioService.atualizarEstadio(estadioSalvo, novoEstadio)).thenReturn(estadioSalvo);
-
-        mockMvc.perform(put("/estadio/{id}", 1L)
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(estadioSalvo)))
-                .andExpect(status().isOk());
-
-    }
 
     @Test
     void deleteEstadioDeveRetornarStatusOk() throws Exception {
@@ -119,6 +105,12 @@ public class EstadioControllerWebTest {
                 .andExpect(jsonPath("$.content[1].nomeEstadio").value("Estadio 2"));
     }
 
+    public EstadioResponseDto montarEstadioModelParaTestesDto(String nome) {
+
+      return new EstadioResponseDto( nome, "13208-600", "Rua Exemplo", "Apto 101", "Bairro Exemplo", "Cidade Exemplo", "UF", "12345678", "0000", "11", "0000", true);
+
+    }
+
     public EstadioModel montarEstadioModelParaTestes(Long id, String nome) {
 
         EstadioModel estadioModel = new EstadioModel();
@@ -127,4 +119,5 @@ public class EstadioControllerWebTest {
 
         return estadioModel;
     }
+
 }

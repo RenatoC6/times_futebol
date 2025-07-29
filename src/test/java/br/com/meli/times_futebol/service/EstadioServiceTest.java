@@ -1,6 +1,7 @@
 package br.com.meli.times_futebol.service;
 
 import br.com.meli.times_futebol.dto.EstadioRequestDto;
+import br.com.meli.times_futebol.dto.EstadioResponseDto;
 import br.com.meli.times_futebol.exception.EntidadeNaoEncontradaException;
 import br.com.meli.times_futebol.model.EstadioModel;
 import br.com.meli.times_futebol.repository.EstadioRepository;
@@ -36,12 +37,12 @@ public class EstadioServiceTest {
     @Test
     public void testeQuandoCriarEstadioComValidacoes() {
 
-        EstadioRequestDto dto = new EstadioRequestDto("EstadioTeste");
+        EstadioRequestDto dto = new EstadioRequestDto("EstadioTeste", "13208-600");
         when(estadioRepository.existsByNomeEstadioIgnoreCase(any())).thenReturn(false);
 
-        EstadioModel estadioRetornado = estadioService.criarEstadio(dto);
+        EstadioResponseDto estadioResponseDto =  estadioService.criarEstadio(dto);
 
-        assertEquals("EstadioTeste", estadioRetornado.getNomeEstadio());
+        assertEquals("13208-600", estadioResponseDto.cep());
         verify(estadioRepository).save(any());
 
     }
@@ -49,7 +50,7 @@ public class EstadioServiceTest {
     @Test
     public void testeQuandoAtualizarEstadioComValidacoes() {
 
-        EstadioRequestDto dto = new EstadioRequestDto("EstadioAtualizado");
+        EstadioRequestDto dto = new EstadioRequestDto("EstadioAtualizado", "13208-500");
         EstadioModel estadioExistente = new EstadioModel();
         estadioExistente.setId(1L);
         estadioExistente.setNomeEstadio("EstadioAntigo");
@@ -57,12 +58,12 @@ public class EstadioServiceTest {
         when(estadioRepository.findById(1L)).thenReturn(java.util.Optional.of(estadioExistente));
         when(estadioRepository.existsByNomeEstadioIgnoreCase(any())).thenReturn(false);
 
-        EstadioModel estadioAtualizado = estadioService.atualizarEstadio(estadioExistente, dto);
+        EstadioResponseDto estadioAtualizado  = estadioService.atualizarEstadio(estadioExistente, dto);
 
-        assertEquals("EstadioAtualizado", estadioAtualizado.getNomeEstadio());
+        assertEquals("13208-500", estadioAtualizado.cep());
         verify(estadioRepository).save(any());
 
-    }
+   }
 
     @Test
     public void testeQuandoListarEstadios() {

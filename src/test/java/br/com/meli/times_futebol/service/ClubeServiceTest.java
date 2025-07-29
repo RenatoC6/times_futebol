@@ -126,7 +126,7 @@ public class ClubeServiceTest {
         List<ClubeModel> clubes = List.of(clube1);
         Page<ClubeModel> pageResult = new PageImpl<>(clubes, pageable, clubes.size());
 
-        Specification<ClubeModel> specs = any();
+        Specification<ClubeModel> specs = null;
 
         when(clubeRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(pageResult);
 

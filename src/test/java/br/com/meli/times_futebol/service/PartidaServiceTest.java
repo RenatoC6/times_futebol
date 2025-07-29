@@ -315,7 +315,7 @@ public class PartidaServiceTest {
     }
 
     @Test
-    void testDeveListarTodasPartidasSemClubeIdEEstadioId() {
+    void testDeveListarTodasPartidasSemClubeIdEstadioId() {
         int page = 0;
         int size = 10;
         String[] sort = {"dataPartida", "asc"};

@@ -60,14 +60,15 @@ public class ClubeService {
 
         Specification<ClubeModel> specs = null;
 
-        if (nome != null) {
+        if (nome != null && !nome.isEmpty()) {
             specs = ClubeSpecification.porNome(nome);
-        } else if (estado != null) {
-            specs = ClubeSpecification.porEstado(estado);
-        } else if (!status) {
-            specs = ClubeSpecification.porStatus(status);
         }
-
+        if (estado != null && !estado.isEmpty()) {
+            specs = specs == null ? ClubeSpecification.porEstado(estado) : specs.or(ClubeSpecification.porEstado(estado));
+        }
+        if (!status) {
+            specs = specs == null ? ClubeSpecification.porStatus(status) : specs.or(ClubeSpecification.porStatus(status));
+        }
 
         return clubeRepository.findAll(specs,pageable);
 

@@ -1,7 +1,7 @@
 package br.com.meli.times_futebol.service;
 
 import br.com.meli.times_futebol.dto.EstadioRequestDto;
-import br.com.meli.times_futebol.dto.EstadioResponseDto;
+import br.com.meli.times_futebol.dto.EstadioViaCepDto;
 import br.com.meli.times_futebol.exception.EntidadeNaoEncontradaException;
 import br.com.meli.times_futebol.exception.GenericException;
 import br.com.meli.times_futebol.exception.GenericExceptionConflict;
@@ -26,10 +26,10 @@ public class EstadioService {
         validaNomeEstadio(estadioRequestDto);
         validaEstadoExistente(estadioRequestDto);
 
-        EstadioResponseDto estadioResponseDto = buscarCep(estadioRequestDto.cep());
+        EstadioViaCepDto estadioViaCepDto = buscarCep(estadioRequestDto.cep());
 
         var estadioModel = new EstadioModel();
-        BeanUtils.copyProperties(estadioResponseDto, estadioModel);
+        BeanUtils.copyProperties(estadioViaCepDto, estadioModel);
         estadioModel.setNomeEstadio(estadioRequestDto.nomeEstadio());
         estadioRepository.save(estadioModel);
 
@@ -44,9 +44,9 @@ public class EstadioService {
             validaEstadoExistente(estadioRequestDto);
         }
 
-        EstadioResponseDto estadioResponseDto = buscarCep(estadioRequestDto.cep());
+        EstadioViaCepDto estadioViaCepDto = buscarCep(estadioRequestDto.cep());
 
-        BeanUtils.copyProperties(estadioResponseDto, estadioModel);
+        BeanUtils.copyProperties(estadioViaCepDto, estadioModel);
         estadioModel.setId(estadioModel.getId());
         estadioModel.setNomeEstadio(estadioRequestDto.nomeEstadio());
         estadioRepository.save(estadioModel);
@@ -90,7 +90,7 @@ public class EstadioService {
         }
     }
 
-    public EstadioResponseDto buscarCep(String cep) {
+    public EstadioViaCepDto buscarCep(String cep) {
         final RestTemplate restTemplate = new RestTemplate();
 
         if (cep == null || cep.isEmpty() || !cep.matches("\\d{5}-?\\d{3}")) { //  \\d{5}: exatamente 5 dígitos (números) -?: hífen opcional (pode ou não ter um hífen entre os números) \\d{3}: exatamente 3 dígitos
@@ -100,13 +100,13 @@ public class EstadioService {
                 .fromHttpUrl("https://viacep.com.br/ws/{cep}/json/")
                 .buildAndExpand(cep)
                 .toUriString();
-        EstadioResponseDto estadioResponseDto = restTemplate.getForObject(url, EstadioResponseDto.class);
+        EstadioViaCepDto estadioViaCepDto = restTemplate.getForObject(url, EstadioViaCepDto.class);
 
-        if (estadioResponseDto == null || estadioResponseDto.erro()) {
+        if (estadioViaCepDto == null || estadioViaCepDto.erro()) {
             throw new GenericException("CEP invalido");
         }
 
-        return estadioResponseDto;
+        return estadioViaCepDto;
     }
 
 }

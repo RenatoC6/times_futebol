@@ -3,12 +3,15 @@ package br.com.meli.times_futebol.service;
 import br.com.meli.times_futebol.dto.ClubeRequestDto;
 import br.com.meli.times_futebol.dto.ClubeResponseRankingDto;
 import br.com.meli.times_futebol.dto.ClubeResponseRetrospectivaDto;
-import br.com.meli.times_futebol.exception.GenericException;
 import br.com.meli.times_futebol.exception.GenericExceptionConflict;
 import br.com.meli.times_futebol.model.ClubeModel;
 import br.com.meli.times_futebol.model.PartidaModel;
 import br.com.meli.times_futebol.repository.ClubeRepository;
 import br.com.meli.times_futebol.repository.PartidaRepository;
+import br.com.meli.times_futebol.validator.clube.ValidaDataCriacao;
+import br.com.meli.times_futebol.validator.clube.ValidaEstado;
+import br.com.meli.times_futebol.validator.clube.ValidaNome;
+import br.com.meli.times_futebol.validator.clube.ValidaNomeExistente;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -23,8 +26,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class ClubeServiceTest {
 
@@ -43,6 +45,14 @@ public class ClubeServiceTest {
     @InjectMocks
     private ClubeService clubeService;
 
+    @Mock
+    private final ValidaNome validaNome = new ValidaNome();
+    @Mock
+    private final ValidaEstado validaEstado = new ValidaEstado();
+    @Mock
+    private final ValidaDataCriacao validaDataCriacao = new ValidaDataCriacao();
+    @Mock
+    private final ValidaNomeExistente validaNomeExistente = new ValidaNomeExistente();
 
     @BeforeEach
     void setUp() {
@@ -51,12 +61,16 @@ public class ClubeServiceTest {
 
     @Test
     public void testeDeveCriarClubeComDadosValidos() {
-        // Arrange
+
         ClubeRequestDto clubeRequestDto = new ClubeRequestDto("teste", "SP", LocalDate.of(2025, 1, 1), false);
         when(clubeRepository.existsByNomeIgnoreCase(any())).thenReturn(false);
-        // Act
+        doNothing().when(validaNome).validar(clubeRequestDto);
+        doNothing().when(validaEstado).validar(clubeRequestDto);
+        doNothing().when(validaDataCriacao).validar(clubeRequestDto);
+        doNothing().when(validaNomeExistente).validar(clubeRequestDto);
+
         ClubeModel cluberetornado = clubeService.criarTime(clubeRequestDto);
-        // Assertion
+
         assertEquals("teste", cluberetornado.getNome());
         assertEquals("SP", cluberetornado.getEstado());
         assertEquals(LocalDate.of(2025, 1, 1), cluberetornado.getDataCriacao());
@@ -137,46 +151,6 @@ public class ClubeServiceTest {
 
     }
 
-
-    @Test
-    void testeLancarExceptionQuandoNomeMenorQue3Caracteres() {
-        ClubeRequestDto clubeRequestDto = new ClubeRequestDto("A", "SP", LocalDate.now(), true);
-        Exception ex = assertThrows(GenericException.class, () -> clubeService.validaNome(clubeRequestDto));
-        assertTrue(ex.getMessage().contains("no minimo 3 caracteres"));
-    }
-
-
-    @Test
-    void testeLancarExceptionQuandoEstadoInvalido() {
-        ClubeRequestDto clubeRequestDto = new ClubeRequestDto("teste", "xx", LocalDate.now(), false);
-        Exception ex = assertThrows(GenericException.class, () -> clubeService.validaEstado(clubeRequestDto));
-        assertTrue(ex.getMessage().contains("invalido"));
-    }
-
-    @Test
-    void testeLancarExceptionQuandoDataCriacaoNoFuturo() {
-        ClubeRequestDto clubeRequestDto = new ClubeRequestDto("teste", "SP", LocalDate.of(2025, 12, 1), true);
-        Exception ex = assertThrows(GenericException.class,
-                () -> clubeService.validaDataCriacao(clubeRequestDto));
-        assertTrue(ex.getMessage().contains("data de criacao"));
-    }
-
-    @Test
-    void testeLancarExceptionQuandoDataCriacaoNull() {
-        ClubeRequestDto clubeRequestDto = new ClubeRequestDto("teste", "SP", null, true);
-        Exception ex = assertThrows(GenericException.class,
-                () -> clubeService.validaDataCriacao(clubeRequestDto));
-        assertTrue(ex.getMessage().contains("data de criacao"));
-    }
-
-    @Test
-    void testeLancarExceptionQuandoNomeJaExistente() {
-        ClubeRequestDto clubeRequestDto = new ClubeRequestDto("paulista", "SP", LocalDate.now(), true);
-        when(clubeRepository.existsByNomeIgnoreCase(any())).thenReturn(true);
-        Exception ex = assertThrows(GenericExceptionConflict.class,
-                () -> clubeService.validaNomeExistente(clubeRequestDto));
-        assertTrue(ex.getMessage().contains(" ja cadastrado"));
-    }
 
     @Test
     void testeDeveRetornarMensagemQuandoListaPartidasVaziaNaBuscaRestropectiva() {

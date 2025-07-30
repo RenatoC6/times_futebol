@@ -21,7 +21,7 @@ public class EstadioService {
     @Autowired
     EstadioRepository estadioRepository;
 
-    public EstadioResponseDto criarEstadio(EstadioRequestDto estadioRequestDto) {
+    public EstadioModel criarEstadio(EstadioRequestDto estadioRequestDto) {
 
         validaNomeEstadio(estadioRequestDto);
         validaEstadoExistente(estadioRequestDto);
@@ -33,10 +33,10 @@ public class EstadioService {
         estadioModel.setNomeEstadio(estadioRequestDto.nomeEstadio());
         estadioRepository.save(estadioModel);
 
-        return estadioResponseDto;
+        return estadioModel;
     }
 
-    public EstadioResponseDto atualizarEstadio(EstadioModel estadioModel, EstadioRequestDto estadioRequestDto) {
+    public EstadioModel atualizarEstadio(EstadioModel estadioModel, EstadioRequestDto estadioRequestDto) {
 
         validaNomeEstadio(estadioRequestDto);
 
@@ -48,9 +48,10 @@ public class EstadioService {
 
         BeanUtils.copyProperties(estadioResponseDto, estadioModel);
         estadioModel.setId(estadioModel.getId());
+        estadioModel.setNomeEstadio(estadioRequestDto.nomeEstadio());
         estadioRepository.save(estadioModel);
 
-        return estadioResponseDto;
+        return estadioModel;
     }
 
     public Page<EstadioModel> listarTodosEstadios(Pageable pageable) {

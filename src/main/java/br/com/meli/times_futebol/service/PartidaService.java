@@ -122,7 +122,7 @@ public class PartidaService {
 
     public Page<PartidaModel> listarTodasPartidas(int page, int size, String[] sort, Long clubeId, String goleadas) {
 
-        if(clubeId != null) {
+        if (clubeId != null) {
             buscarClube(clubeId, "para listar partidas por clube");
         } else if ("S".equalsIgnoreCase(goleadas))
             throw new GenericException("Quando 'goleadas' for 'S', o parâmetro 'clubeId' é obrigatório.");
@@ -146,7 +146,7 @@ public class PartidaService {
         if (clubeId != null && "S".equalsIgnoreCase(goleadas)) {
             specs = PartidaSpecification.porClubeEGoleadas(clubeId);
         } else if (clubeId != null) {
-            specs =  PartidaSpecification.porClube(clubeId);
+            specs = PartidaSpecification.porClube(clubeId);
         }
 
         return partidaRepository.findAll(specs, pageable);

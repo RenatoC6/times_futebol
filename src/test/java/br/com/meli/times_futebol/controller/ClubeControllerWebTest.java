@@ -86,6 +86,21 @@ public class ClubeControllerWebTest {
     }
 
     @Test
+    void testDeveAtualizarClube() throws Exception {
+        ClubeRequestDto clubeRequestDto = new ClubeRequestDto("Clube Atualizado", "MG", LocalDate.of(2025, 1, 1), true);
+        ClubeModel clubeExistente = montarClubeModelParaTestes(1L, "Clube Antigo", "SP", LocalDate.of(2025, 1, 1), true);
+
+        when(clubeService.acharTime(1L)).thenReturn(clubeExistente);
+        when(clubeService.atualizarTime(1L, clubeRequestDto)).thenReturn(clubeExistente);
+
+        mockMvc.perform(put("/clube/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(clubeRequestDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value("Clube: 1: Clube Antigo alterado com sucesso"));
+    }
+
+    @Test
     void testDeveRetornarClubesQuandoExistemClubes() throws Exception {
 
         ClubeModel clube1 = montarClubeModelParaTestes(1L, "Flamengo", "RJ", LocalDate.of(2025, 1, 1), true);
@@ -95,7 +110,7 @@ public class ClubeControllerWebTest {
 
         Page<ClubeModel> pageClubes = new PageImpl<>(clubes);
 
-        when(clubeService.listarTodosTimes(eq(0), eq(10), any(String[].class), eq("Santos"), eq("SP"),eq(true))).thenReturn(pageClubes);
+        when(clubeService.listarTodosTimes(eq(0), eq(10), any(String[].class), eq("Santos"), eq("SP"), eq(true))).thenReturn(pageClubes);
 
         mockMvc.perform(get("/clube/listarClubes")
                         .param("page", "0")
@@ -112,7 +127,7 @@ public class ClubeControllerWebTest {
     @Test
     void testdeveRetornarMensagemQuandoNaoExistemClubes() throws Exception {
         Page<ClubeModel> emptyPage = new PageImpl<>(Collections.emptyList());
-        when(clubeService.listarTodosTimes(eq(0), eq(10), any(String[].class), eq("Santos"), eq("SP"),eq(true))).thenReturn(emptyPage);
+        when(clubeService.listarTodosTimes(eq(0), eq(10), any(String[].class), eq("Santos"), eq("SP"), eq(true))).thenReturn(emptyPage);
 
         mockMvc.perform(get("/clube/listarClubes")
                 .param("page", "0")
@@ -133,6 +148,22 @@ public class ClubeControllerWebTest {
         // mocMvc simu
         mockMvc.perform(get("/clube/retrospectiva/{idClube}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)) //Diz que o tipo de conteúdo solicitado (header HTTP Content-Type) é application/json.
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nome").value("Palmeiras"))
+                .andExpect(jsonPath("$.vitorias").value(1));
+    }
+
+    @Test
+    void testDeveRetornarRetrospectivaClubesContraAdversario() throws Exception {
+
+        ClubeResponseRetrospectivaDto dto = new ClubeResponseRetrospectivaDto("Teste", "Palmeiras", "Santos", 1L, 1L, 1L, 1L, 1L);
+
+        when(clubeService.buscaRetrospectivaClubesContraAdversario(1L, 2L)).thenReturn(dto);
+
+        mockMvc.perform(get("/clube/retrospectiva")
+                        .param("clube1", "1")
+                        .param("clube2", "2")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nome").value("Palmeiras"))
                 .andExpect(jsonPath("$.vitorias").value(1));

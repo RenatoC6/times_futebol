@@ -1,7 +1,6 @@
 package br.com.meli.times_futebol.controller;
 
 import br.com.meli.times_futebol.dto.EstadioRequestDto;
-import br.com.meli.times_futebol.dto.EstadioResponseDto;
 import br.com.meli.times_futebol.exception.GenericException;
 import br.com.meli.times_futebol.model.EstadioModel;
 import br.com.meli.times_futebol.service.EstadioService;
@@ -25,9 +24,9 @@ public class EstadioController {
     @PostMapping
     public ResponseEntity<?> cadastrarEstadio(@RequestBody @Valid EstadioRequestDto estadioRequestDto) {
 
-        EstadioResponseDto estadioResponseDto = estadioService.criarEstadio(estadioRequestDto);
+        EstadioModel estadioModel = estadioService.criarEstadio(estadioRequestDto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(estadioResponseDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(estadioModel);
     }
 
     @PutMapping("/{idEstadio}")
@@ -36,11 +35,9 @@ public class EstadioController {
 
         EstadioModel estadioModel = estadioService.acharEstadio(idEstadio);
 
-        estadioModel.setNomeEstadio(estadioRequestDto.nomeEstadio());
+        EstadioModel estadioModelAtlz = estadioService.atualizarEstadio(estadioModel, estadioRequestDto);
 
-        EstadioResponseDto estadioResponseDto = estadioService.atualizarEstadio(estadioModel, estadioRequestDto);
-
-        return ResponseEntity.status(HttpStatus.OK).body(estadioResponseDto);
+        return ResponseEntity.status(HttpStatus.OK).body(estadioModelAtlz);
 
     }
 

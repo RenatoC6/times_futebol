@@ -1,7 +1,6 @@
 package br.com.meli.times_futebol.service;
 
 import br.com.meli.times_futebol.dto.EstadioRequestDto;
-import br.com.meli.times_futebol.dto.EstadioResponseDto;
 import br.com.meli.times_futebol.exception.EntidadeNaoEncontradaException;
 import br.com.meli.times_futebol.model.EstadioModel;
 import br.com.meli.times_futebol.repository.EstadioRepository;
@@ -40,9 +39,9 @@ public class EstadioServiceTest {
         EstadioRequestDto dto = new EstadioRequestDto("EstadioTeste", "13208-600");
         when(estadioRepository.existsByNomeEstadioIgnoreCase(any())).thenReturn(false);
 
-        EstadioResponseDto estadioResponseDto =  estadioService.criarEstadio(dto);
+        EstadioModel estadioModel = estadioService.criarEstadio(dto);
 
-        assertEquals("13208-600", estadioResponseDto.cep());
+        assertEquals("13208-600", estadioModel.getCep());
         verify(estadioRepository).save(any());
 
     }
@@ -58,12 +57,12 @@ public class EstadioServiceTest {
         when(estadioRepository.findById(1L)).thenReturn(java.util.Optional.of(estadioExistente));
         when(estadioRepository.existsByNomeEstadioIgnoreCase(any())).thenReturn(false);
 
-        EstadioResponseDto estadioAtualizado  = estadioService.atualizarEstadio(estadioExistente, dto);
+        EstadioModel estadioAtualizado = estadioService.atualizarEstadio(estadioExistente, dto);
 
-        assertEquals("13208-500", estadioAtualizado.cep());
+        assertEquals("13208-500", estadioAtualizado.getCep());
         verify(estadioRepository).save(any());
 
-   }
+    }
 
     @Test
     public void testeQuandoListarEstadios() {

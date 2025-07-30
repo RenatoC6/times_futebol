@@ -1,7 +1,6 @@
 package br.com.meli.times_futebol.controller;
 
 import br.com.meli.times_futebol.dto.EstadioRequestDto;
-import br.com.meli.times_futebol.dto.EstadioResponseDto;
 import br.com.meli.times_futebol.model.EstadioModel;
 import br.com.meli.times_futebol.service.EstadioService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,7 +40,7 @@ public class EstadioControllerWebTest {
     @Test
     void TestDeveBuscarEstadioPorId() throws Exception {
 
-       EstadioModel estadioModel = montarEstadioModelParaTestes(1L, "Estadio 1");
+        EstadioModel estadioModel = montarEstadioModelParaTestes(1L, "Estadio 1");
 
         when(estadioService.acharEstadio(1L)).thenReturn(estadioModel);
 
@@ -55,7 +54,8 @@ public class EstadioControllerWebTest {
     void TestDeveCriarEstadio() throws Exception {
 
         EstadioRequestDto novoEstadio = new EstadioRequestDto("Estadio 1", "13208-600");
-        EstadioResponseDto estadioSalvo = montarEstadioModelParaTestesDto( "Novo Estadio");
+        Long id = 2L;
+        EstadioModel estadioSalvo = montarEstadioModelParaTestes(id, "Novo Estadio");
         when(estadioService.criarEstadio(novoEstadio)).thenReturn(estadioSalvo);
 
         mockMvc.perform(post("/estadio")
@@ -66,6 +66,21 @@ public class EstadioControllerWebTest {
 
     }
 
+    @Test
+    void TestDeveAtualizarEstadio() throws Exception {
+
+        EstadioRequestDto estadioRequestDto = new EstadioRequestDto("Estadio Atualizado", "13208-500");
+        EstadioModel estadioExistente = montarEstadioModelParaTestes(1L, "Estadio Antigo");
+
+        when(estadioService.acharEstadio(1L)).thenReturn(estadioExistente);
+        when(estadioService.atualizarEstadio(estadioExistente, estadioRequestDto)).thenReturn(estadioExistente);
+
+        mockMvc.perform(put("/estadio/{idEstadio}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(estadioRequestDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nomeEstadio").value("Estadio Antigo"));
+    }
 
 
     @Test
@@ -105,19 +120,24 @@ public class EstadioControllerWebTest {
                 .andExpect(jsonPath("$.content[1].nomeEstadio").value("Estadio 2"));
     }
 
-    public EstadioResponseDto montarEstadioModelParaTestesDto(String nome) {
-
-      return new EstadioResponseDto( nome, "13208-600", "Rua Exemplo", "Apto 101", "Bairro Exemplo", "Cidade Exemplo", "UF", "12345678", "0000", "11", "0000", true);
-
-    }
-
     public EstadioModel montarEstadioModelParaTestes(Long id, String nome) {
 
         EstadioModel estadioModel = new EstadioModel();
         estadioModel.setId(id);
         estadioModel.setNomeEstadio(nome);
+        estadioModel.setCep("13208-600");
+        estadioModel.setLogradouro("Rua Exemplo");
+        estadioModel.setComplemento("Apto 101");
+        estadioModel.setBairro("Bairro Exemplo");
+        estadioModel.setLocalidade("Cidade Exemplo");
+        estadioModel.setUf("UF");
+        estadioModel.setIbge("12345678");
+        estadioModel.setGia("0000");
+        estadioModel.setDdd("11");
+        estadioModel.setSiafi("0000");
 
         return estadioModel;
+
     }
 
 }

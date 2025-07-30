@@ -110,7 +110,7 @@ public class ClubeServiceTest {
 
     @Test
     void listarTodosTimesDeveRetornarPageComTimes() {
-        String[] sort = new String[] {"nome", "asc"};
+        String[] sort = new String[]{"nome", "asc"};
         int page = 0;
         int size = 10;
         String nome = "Time1";
@@ -121,12 +121,10 @@ public class ClubeServiceTest {
         Sort sortOrder = Sort.by(direction, sort[0]);
         Pageable pageable = PageRequest.of(page, size, sortOrder);
 
-        ClubeModel clube1 = montarClubeModelParaTestes(1L , nome, estado, LocalDate.of(2025, 1, 1), false);
+        ClubeModel clube1 = montarClubeModelParaTestes(1L, nome, estado, LocalDate.of(2025, 1, 1), false);
 
         List<ClubeModel> clubes = List.of(clube1);
         Page<ClubeModel> pageResult = new PageImpl<>(clubes, pageable, clubes.size());
-
-        Specification<ClubeModel> specs = null;
 
         when(clubeRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(pageResult);
 

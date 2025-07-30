@@ -1,8 +1,7 @@
 package br.com.meli.times_futebol.controller;
 
-import br.com.meli.times_futebol.dto.ClubeResponseRetrospectivaDto;
-
 import br.com.meli.times_futebol.dto.ClubeRequestDto;
+import br.com.meli.times_futebol.dto.ClubeResponseRetrospectivaDto;
 import br.com.meli.times_futebol.model.ClubeModel;
 import br.com.meli.times_futebol.service.ClubeService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,11 +36,10 @@ public class ClubeController {
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String estado,
             @Parameter(description = "Status -> 0 - ativo / 1 - inativo ")
-            @RequestParam(required = false) boolean status)
-            {
+            @RequestParam(required = false) boolean status) {
 
 
-        return ResponseEntity.status(HttpStatus.OK).body(clubeService.listarTodosTimes(page, size, sort,nome, estado, status));
+        return ResponseEntity.status(HttpStatus.OK).body(clubeService.listarTodosTimes(page, size, sort, nome, estado, status));
 
     }
 
@@ -78,13 +76,13 @@ public class ClubeController {
 
         ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClube(idClube);
 
-        return  ResponseEntity.status(HttpStatus.OK).body(clubeResponseRetrospectivaDto);
+        return ResponseEntity.status(HttpStatus.OK).body(clubeResponseRetrospectivaDto);
 
     }
 
     @GetMapping("/retrospectiva")
     public ResponseEntity<?> listarRetrospectivaClubesContraAdversario(@RequestParam Long clube1,
-                                                       @RequestParam Long clube2) {
+                                                                       @RequestParam Long clube2) {
 
         ClubeResponseRetrospectivaDto clubeResponseRetrospectivaDto = clubeService.buscaRetrospectivaClubesContraAdversario(clube1, clube2);
 
@@ -93,7 +91,7 @@ public class ClubeController {
 
 
     @GetMapping("/ranking/{tipo}")
-      public ResponseEntity<?> listarRanking(@Parameter(description = "Ranking primario é 'Pontos'. Selecione o ranking Secundario: 'gols', 'vitorias' ou 'jogos'")
+    public ResponseEntity<?> listarRanking(@Parameter(description = "Ranking primario é 'Pontos'. Selecione o ranking Secundario: 'gols', 'vitorias' ou 'jogos'")
                                            @RequestParam(defaultValue = "gols") String tipo) {
 
         return ResponseEntity.status(HttpStatus.OK).body(clubeService.listarRankingClubes(tipo));

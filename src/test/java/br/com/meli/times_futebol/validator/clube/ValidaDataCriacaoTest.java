@@ -15,7 +15,7 @@ public class ValidaDataCriacaoTest {
     public void testValidarDataCriacaoFutura() {
         ClubeRequestDto dto = new ClubeRequestDto("Clube Teste", "SP", LocalDate.now().plusDays(1), true);
         try {
-            validaDataCriacao.validar(dto);
+            validaDataCriacao.validar(dto,null);
             assert false : "Deveria ter lançado uma exceção";
         } catch (GenericException e) {
             assert e.getMessage().equals("data de criacao invalido ou no futuro");

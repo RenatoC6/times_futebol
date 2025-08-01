@@ -8,10 +8,7 @@ import br.com.meli.times_futebol.model.ClubeModel;
 import br.com.meli.times_futebol.model.PartidaModel;
 import br.com.meli.times_futebol.repository.ClubeRepository;
 import br.com.meli.times_futebol.repository.PartidaRepository;
-import br.com.meli.times_futebol.validator.clube.ValidaDataCriacao;
-import br.com.meli.times_futebol.validator.clube.ValidaEstado;
-import br.com.meli.times_futebol.validator.clube.ValidaNome;
-import br.com.meli.times_futebol.validator.clube.ValidaNomeExistente;
+import br.com.meli.times_futebol.validator.clube.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -54,9 +51,14 @@ public class ClubeServiceTest {
     @Mock
     private final ValidaNomeExistente validaNomeExistente = new ValidaNomeExistente();
 
+    @Mock
+    private List<ClubeValidator> validators;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        validators = Arrays.asList(validaNome, validaEstado, validaDataCriacao, validaNomeExistente);
+
     }
 
     @Test
@@ -64,10 +66,8 @@ public class ClubeServiceTest {
 
         ClubeRequestDto clubeRequestDto = new ClubeRequestDto("teste", "SP", LocalDate.of(2025, 1, 1), false);
         when(clubeRepository.existsByNomeIgnoreCase(any())).thenReturn(false);
-        doNothing().when(validaNome).validar(clubeRequestDto);
-        doNothing().when(validaEstado).validar(clubeRequestDto);
-        doNothing().when(validaDataCriacao).validar(clubeRequestDto);
-        doNothing().when(validaNomeExistente).validar(clubeRequestDto);
+
+        validators.forEach(v -> doNothing().when(v).validar(clubeRequestDto, null));
 
         ClubeModel cluberetornado = clubeService.criarTime(clubeRequestDto);
 
@@ -86,6 +86,7 @@ public class ClubeServiceTest {
         ClubeModel clubeModel = montarClubeModelParaTestes(1L, "teste", "SP", LocalDate.of(2025, 1, 1), false);
         when(clubeRepository.findById(clubeModel.getId())).thenReturn(Optional.of(clubeModel));
 
+        validators.forEach(v -> doNothing().when(v).validar(clubeRequestDto, null));
         ClubeModel clubeModelAtlz = clubeService.atualizarTime(clubeModel.getId(), clubeRequestDto);
 
         assertEquals(clubeRequestDto.nome(), clubeModelAtlz.getNome());

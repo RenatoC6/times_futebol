@@ -15,7 +15,7 @@ public class ValidaEstadoTest {
     void testValidarEstadoInvalido() {
         ClubeRequestDto dto = new ClubeRequestDto("Clube Teste", "XX", LocalDate.now(), true);
         try {
-            validaEstado.validar(dto);
+            validaEstado.validar(dto,null);
             assert false : "Deveria ter lançado uma exceção";
         } catch (GenericException e) {
             assert e.getMessage().equals("Estado: " + dto.estado() + " invalido");

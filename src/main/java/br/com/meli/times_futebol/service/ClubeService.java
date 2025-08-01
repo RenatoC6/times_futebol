@@ -11,10 +11,7 @@ import br.com.meli.times_futebol.model.PartidaModel;
 import br.com.meli.times_futebol.repository.ClubeRepository;
 import br.com.meli.times_futebol.repository.PartidaRepository;
 import br.com.meli.times_futebol.specification.ClubeSpecification;
-import br.com.meli.times_futebol.validator.clube.ValidaDataCriacao;
-import br.com.meli.times_futebol.validator.clube.ValidaEstado;
-import br.com.meli.times_futebol.validator.clube.ValidaNome;
-import br.com.meli.times_futebol.validator.clube.ValidaNomeExistente;
+import br.com.meli.times_futebol.validator.clube.ClubeValidator;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -38,21 +35,11 @@ public class ClubeService {
     PartidaRepository partidaRepository;
 
     @Autowired
-    private ValidaNome validaNome;
-    @Autowired
-    private ValidaEstado validaEstado;
-    @Autowired
-    private ValidaDataCriacao validaDataCriacao;
-    @Autowired
-    private ValidaNomeExistente validaNomeExistente;
-
+    private List<ClubeValidator> validators;
 
     public ClubeModel criarTime(ClubeRequestDto clubeRequestDto) {
 
-        validaNome.validar(clubeRequestDto);
-        validaEstado.validar(clubeRequestDto);
-        validaDataCriacao.validar(clubeRequestDto);
-        validaNomeExistente.validar(clubeRequestDto);
+        this.validators.forEach(validators -> validators.validar(clubeRequestDto, null));
 
         var clubeModel = new ClubeModel();
         BeanUtils.copyProperties(clubeRequestDto, clubeModel);
@@ -98,14 +85,7 @@ public class ClubeService {
 
         ClubeModel clubeModel = acharTime(idValor);
 
-        validaNome.validar(clubeRequestDto);
-        validaEstado.validar(clubeRequestDto);
-        validaDataCriacao.validar(clubeRequestDto);
-
-        // valida se ja existe esse nome de clube na base, exceto se o nome nao foi alterado
-        if (!clubeModel.getNome().equals(clubeRequestDto.nome())) {
-            validaNomeExistente.validar(clubeRequestDto);
-        }
+        this.validators.forEach(validators -> validators.validar(clubeRequestDto, clubeModel));
 
         clubeModel.setId(idValor);
         BeanUtils.copyProperties(clubeRequestDto, clubeModel);
@@ -327,37 +307,6 @@ public class ClubeService {
 
         return rankingClubes;
     }
-
-    // metodos validacao
-
-//    public void validaNome(ClubeRequestDto clubeRequestDto) {
-//
-//        if (clubeRequestDto.nome().trim().length() < 3) {
-//            throw new GenericException("nome deve ter no minimo 3 caracteres");
-//        }
-//
-//    }
-//
-//    public void validaEstado(ClubeRequestDto clubeRequestDto) {
-//        if (!EstadoBr.validaEstadoBr(clubeRequestDto.estado())) {
-//            throw new GenericException("Estado: " + clubeRequestDto.estado() + " invalido");
-//        }
-//    }
-//
-//    public void validaDataCriacao(ClubeRequestDto clubeRequestDto) {
-//
-//        LocalDate dataCriacao = clubeRequestDto.dataCriacao();
-//
-//        if (dataCriacao == null || dataCriacao.isAfter(LocalDate.now())) {
-//            throw new GenericException("data de criacao invalido ou no futuro");
-//        }
-//    }
-//
-//    public void validaNomeExistente(ClubeRequestDto clubeRequestDto) {
-//        if (clubeRepository.existsByNomeIgnoreCase(clubeRequestDto.nome().toUpperCase())) {
-//            throw new GenericExceptionConflict("Nome : " + clubeRequestDto.nome() + " ja cadastrado");
-//        }
-//    }
 
 
 }

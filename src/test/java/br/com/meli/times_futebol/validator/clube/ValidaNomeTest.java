@@ -14,7 +14,7 @@ public class ValidaNomeTest {
     public void testValidarNomeComMenosDeTresCaracteres() {
         ClubeRequestDto dto = new ClubeRequestDto("xx", "SP", LocalDate.now(), true);
         try {
-            validaNome.validar(dto);
+            validaNome.validar(dto, null);
             assert false : "Deveria ter lançado uma exceção";
         } catch (GenericException e) {
             assert e.getMessage().equals("nome deve ter no minimo 3 caracteres");
